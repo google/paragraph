@@ -1,0 +1,67 @@
+/* Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *  https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+syntax = "proto3";
+
+package paragraph;
+
+option cc_enable_arenas = true;
+
+// Describes the replica groups in a cross replica op (e.g., all-reduce and
+// all-to-all).
+message CommunicationGroupProto {
+  repeated int64 group_ids = 1;
+}
+
+// Serialization of paragraph instructions
+message InstructionProto {
+  string name = 1;
+  string opcode = 2;
+  int64 instruction_id = 3;
+
+  double ops = 4;
+  double bytes_in = 5;
+  double bytes_out = 6;
+  double transcendentals = 7;
+  double seconds = 8;
+
+  int64 bonded_instruction_id = 9;
+  uint64 communication_tag = 10;
+  repeated CommunicationGroupProto communication_groups = 11;
+
+  repeated int64 operand_ids = 12;
+  repeated SubroutineProto inner_subroutines = 13;
+}
+
+// Serialization of subroutine (loose copy of HloComputation)
+message SubroutineProto {
+  string name = 1;
+
+  // The id of this subroutine that is equal to its root instruction id
+  int64 subroutine_root_id = 2;
+
+  double execution_probability = 3;
+  int64 execution_count = 4;
+
+  // The array of instructions is always in a valid dependency order, where
+  // operands appear before their users.
+  repeated InstructionProto instructions = 5;
+}
+
+// Serialization of paragraph graph
+message GraphProto {
+  string name = 1;
+  int64 processor_id = 2;
+  SubroutineProto entry_subroutine = 3;
+}
