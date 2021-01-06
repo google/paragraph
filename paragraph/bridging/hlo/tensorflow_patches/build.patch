@@ -1,0 +1,14 @@
+diff --git a/tensorflow/compiler/xla/tools/BUILD b/tensorflow/compiler/xla/tools/BUILD
+index aa02deb7bc..0d3f21cc4a 100644
+--- a/tensorflow/compiler/xla/tools/BUILD
++++ b/tensorflow/compiler/xla/tools/BUILD
+@@ -270,6 +270,9 @@ cc_library(
+         "@com_google_absl//absl/strings",
+         "@com_google_protobuf//:protobuf_headers",
+     ],
++    visibility = [
++        "//visibility:public",
++    ],
+ )
+ 
+ tf_cc_test(
