@@ -91,7 +91,7 @@ void Graph::ApplyCommunicationTags() {
     CHECK(dst >= 0 && dst < 1ll << 32);
     uint64_t srcdst = ((static_cast<uint64_t>(src) << 32) |
                        static_cast<uint64_t>(dst));
-    uint64_t comm_tag;
+    uint64_t comm_tag = UINT64_MAX;
     switch (opcode) {
       case Opcode::kRecvStart:
       case Opcode::kSendStart:
