@@ -289,7 +289,7 @@ void Instruction::AppendCommunicationGroup(const CommunicationGroup& group) {
     }
   } else if (OpcodeIsIndividualCommunication(opcode_) ||
              OpcodeIsProtocolLevelCommunication(opcode_)) {
-    uint64_t processor_ind;
+    uint64_t processor_ind = UINT64_MAX;
     if (opcode_ == Opcode::kSend ||
         opcode_ == Opcode::kSendStart ||
         opcode_ == Opcode::kSendDone) {
