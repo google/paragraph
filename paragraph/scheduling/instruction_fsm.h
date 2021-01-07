@@ -29,7 +29,7 @@ class SubroutineStateFsm;
   V(kBlocked, "blocked")                                               \
   V(kReady, "ready")                                                   \
   V(kScheduled, "scheduled")                                           \
-  V(kExecuted, "executed")
+  V(kFinished, "finished")
 
 class InstructionFsm {
   friend class GraphScheduler;
@@ -58,8 +58,8 @@ class InstructionFsm {
   void SetReady();
   bool IsScheduled();
   void SetScheduled();
-  bool IsExecuted();
-  void SetExecuted();
+  bool IsFinished();
+  void SetFinished();
 
   // Resets instruction state setting it to Blocked or Ready depending on
   // its operands and their state

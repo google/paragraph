@@ -38,11 +38,11 @@ TEST(SubroutineFsm, StringToStateConversion) {
                            state_str_3));
   EXPECT_EQ(state_3, paragraph::SubroutineFsm::State::kScheduled);
 
-  std::string state_str_4 = "executed";
+  std::string state_str_4 = "finished";
   ASSERT_OK_AND_ASSIGN(paragraph::SubroutineFsm::State state_4,
                        paragraph::SubroutineFsm::StringToSubroutineState(
                            state_str_4));
-  EXPECT_EQ(state_4, paragraph::SubroutineFsm::State::kExecuted);
+  EXPECT_EQ(state_4, paragraph::SubroutineFsm::State::kFinished);
 }
 
 // Tests SubroutineStateToString() method
@@ -58,9 +58,9 @@ TEST(SubroutineFsm, StateToStringConversion) {
             "scheduled");
 
   paragraph::SubroutineFsm::State state_4 =
-      paragraph::SubroutineFsm::State::kExecuted;
+      paragraph::SubroutineFsm::State::kFinished;
   EXPECT_EQ(paragraph::SubroutineFsm::SubroutineStateToString(state_4),
-            "executed");
+            "finished");
 }
 
 // Tests subroutine FSM state setters and getters
@@ -84,8 +84,8 @@ TEST(SubroutineFsm, StateTransition) {
   scheduler->GetFsm(sub_ptr).SetScheduled();
   EXPECT_TRUE(scheduler->GetFsm(sub_ptr).IsScheduled());
 
-  scheduler->GetFsm(sub_ptr).SetExecuted();
-  EXPECT_TRUE(scheduler->GetFsm(sub_ptr).IsExecuted());
+  scheduler->GetFsm(sub_ptr).SetFinished();
+  EXPECT_TRUE(scheduler->GetFsm(sub_ptr).IsFinished());
 }
 
 // Tests subroutine FSM execution count setting and decrementing
@@ -154,12 +154,12 @@ TEST(SubroutineFsm, ResetState) {
   EXPECT_TRUE(scheduler->GetFsm(instr_2).IsBlocked());
   EXPECT_TRUE(scheduler->GetFsm(sub_ptr).IsScheduled());
 
-  scheduler->GetFsm(instr_1).SetExecuted();
-  scheduler->GetFsm(instr_2).SetExecuted();
-  scheduler->GetFsm(sub_ptr).SetExecuted();
-  EXPECT_TRUE(scheduler->GetFsm(instr_1).IsExecuted());
-  EXPECT_TRUE(scheduler->GetFsm(instr_2).IsExecuted());
-  EXPECT_TRUE(scheduler->GetFsm(sub_ptr).IsExecuted());
+  scheduler->GetFsm(instr_1).SetFinished();
+  scheduler->GetFsm(instr_2).SetFinished();
+  scheduler->GetFsm(sub_ptr).SetFinished();
+  EXPECT_TRUE(scheduler->GetFsm(instr_1).IsFinished());
+  EXPECT_TRUE(scheduler->GetFsm(instr_2).IsFinished());
+  EXPECT_TRUE(scheduler->GetFsm(sub_ptr).IsFinished());
 
   scheduler->GetFsm(sub_ptr).Reset();
   EXPECT_TRUE(scheduler->GetFsm(instr_1).IsReady());
@@ -211,8 +211,8 @@ TEST(SubroutineFsm, PrepareToSchedule) {
   EXPECT_EQ(consumed_instructions.at(0)->GetName(), "body");
 }
 
-// Tests subroutine FSM state change when instruction is executed
-TEST(SubroutineFsm, InstructionExecuted) {
+// Tests subroutine FSM state change when instruction is finished
+TEST(SubroutineFsm, InstructionFinished) {
   auto graph = absl::make_unique<paragraph::Graph>("test_graph", 1);
   auto sub = absl::make_unique<paragraph::Subroutine>(
       "test_subroutine", graph.get());
@@ -229,10 +229,10 @@ TEST(SubroutineFsm, InstructionExecuted) {
   // Consume first available instruction, which is dummy
   auto consumed_instructions = scheduler->GetReadyInstructions();
 
-  EXPECT_OK(scheduler->GetFsm(sub_ptr).InstructionExecuted(
+  EXPECT_OK(scheduler->GetFsm(sub_ptr).InstructionFinished(
       consumed_instructions.at(0)));
   EXPECT_EQ(scheduler->GetFsm(sub_ptr).GetExecutionCount(), 0);
-  EXPECT_TRUE(scheduler->GetFsm(sub_ptr).IsExecuted());
+  EXPECT_TRUE(scheduler->GetFsm(sub_ptr).IsFinished());
   consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 0);
 }

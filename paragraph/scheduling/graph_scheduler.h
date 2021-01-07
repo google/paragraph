@@ -50,9 +50,9 @@ class GraphScheduler {
   // NOLINTNEXTLINE(runtime/references)
   void GetReadyInstructions(std::queue<Instruction*>& queue);
 
-  // Marks instruction as Executed in Simulator
+  // Marks instruction as Finished in Simulator
   // Part of Public API with simulators
-  void InstructionExecuted(Instruction* instruction);
+  void InstructionFinished(Instruction* instruction);
 
   // Seeds internal PRNG
   // The scheduler makes decisions about the order in which some subroutines are

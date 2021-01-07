@@ -45,11 +45,11 @@ TEST(InstructionFsm, StringToStateConversion) {
                            state_str_3));
   EXPECT_EQ(state_3, paragraph::InstructionFsm::State::kScheduled);
 
-  std::string state_str_4 = "executed";
+  std::string state_str_4 = "finished";
   ASSERT_OK_AND_ASSIGN(paragraph::InstructionFsm::State state_4,
                        paragraph::InstructionFsm::StringToInstructionState(
                            state_str_4));
-  EXPECT_EQ(state_4, paragraph::InstructionFsm::State::kExecuted);
+  EXPECT_EQ(state_4, paragraph::InstructionFsm::State::kFinished);
 }
 
 // Tests InstructionStateToString() method
@@ -70,9 +70,9 @@ TEST(InstructionFsm, StateToStringConversion) {
             "scheduled");
 
   paragraph::InstructionFsm::State state_4 =
-      paragraph::InstructionFsm::State::kExecuted;
+      paragraph::InstructionFsm::State::kFinished;
   EXPECT_EQ(paragraph::InstructionFsm::InstructionStateToString(state_4),
-            "executed");
+            "finished");
 }
 
 // Tests instruction FSM state setters and getters
@@ -99,8 +99,8 @@ TEST(InstructionFsm, StateTransition) {
   instr_fsm.SetScheduled();
   EXPECT_TRUE(instr_fsm.IsScheduled());
 
-  instr_fsm.SetExecuted();
-  EXPECT_TRUE(instr_fsm.IsExecuted());
+  instr_fsm.SetFinished();
+  EXPECT_TRUE(instr_fsm.IsFinished());
 }
 
 // Tests IsUnblockedByOperands() method
@@ -123,7 +123,7 @@ TEST(InstructionFsm, CheckUnblocked) {
   EXPECT_TRUE(scheduler->GetFsm(instr_1).IsUnblockedByOperands());
   EXPECT_FALSE(scheduler->GetFsm(instr_2).IsUnblockedByOperands());
 
-  scheduler->GetFsm(instr_1).SetExecuted();
+  scheduler->GetFsm(instr_1).SetFinished();
   EXPECT_TRUE(scheduler->GetFsm(instr_2).IsUnblockedByOperands());
 }
 
@@ -147,13 +147,13 @@ TEST(InstructionFsm, ResetState) {
   EXPECT_TRUE(scheduler->GetFsm(instr_1).IsReady());
   EXPECT_TRUE(scheduler->GetFsm(instr_2).IsBlocked());
 
-  scheduler->GetFsm(instr_1).SetExecuted();
-  scheduler->GetFsm(instr_2).SetExecuted();
-  EXPECT_TRUE(scheduler->GetFsm(instr_1).IsExecuted());
-  EXPECT_TRUE(scheduler->GetFsm(instr_2).IsExecuted());
+  scheduler->GetFsm(instr_1).SetFinished();
+  scheduler->GetFsm(instr_2).SetFinished();
+  EXPECT_TRUE(scheduler->GetFsm(instr_1).IsFinished());
+  EXPECT_TRUE(scheduler->GetFsm(instr_2).IsFinished());
 
   scheduler->GetFsm(instr_2).Reset();
-  EXPECT_TRUE(scheduler->GetFsm(instr_1).IsExecuted());
+  EXPECT_TRUE(scheduler->GetFsm(instr_1).IsFinished());
   EXPECT_TRUE(scheduler->GetFsm(instr_2).IsBlocked());
 
   scheduler->GetFsm(instr_1).Reset();
@@ -275,7 +275,7 @@ TEST(InstructionFsm, PickSubroutine) {
                        scheduler->GetFsm(while_instr).PickSubroutine());
   EXPECT_EQ(picked_subroutine->GetName(), "body_subroutine");
 
-  scheduler->GetFsm(body_ptr).SetExecuted();
+  scheduler->GetFsm(body_ptr).SetFinished();
   ASSERT_OK_AND_ASSIGN(picked_subroutine,
                        scheduler->GetFsm(while_instr).PickSubroutine());
   EXPECT_EQ(picked_subroutine->GetName(), "cond_subroutine");
@@ -339,17 +339,17 @@ TEST(InstructionFsm, PickSubroutineCall) {
   ASSERT_OK_AND_ASSIGN(picked_subroutine,
                        scheduler->GetFsm(call).PickSubroutine());
   EXPECT_EQ(picked_subroutine->GetName(), "subroutine_1");
-  scheduler->InstructionExecuted(instr_1);
+  scheduler->InstructionFinished(instr_1);
 
   ASSERT_OK_AND_ASSIGN(picked_subroutine,
                        scheduler->GetFsm(call).PickSubroutine());
   EXPECT_EQ(picked_subroutine->GetName(), "subroutine_2");
-  scheduler->InstructionExecuted(instr_2);
+  scheduler->InstructionFinished(instr_2);
 
   ASSERT_OK_AND_ASSIGN(picked_subroutine,
                        scheduler->GetFsm(call).PickSubroutine());
   EXPECT_EQ(picked_subroutine->GetName(), "subroutine_3");
-  scheduler->InstructionExecuted(instr_3);
+  scheduler->InstructionFinished(instr_3);
 
-  EXPECT_TRUE(scheduler->GetFsm(call).IsExecuted());
+  EXPECT_TRUE(scheduler->GetFsm(call).IsFinished());
 }

@@ -162,39 +162,39 @@ TEST(Scheduler, WhileInstruction) {
   EXPECT_EQ(consumed_instructions.at(1)->GetName(), "body_compute");
   EXPECT_EQ(consumed_instructions.at(2)->GetName(), "send");
 
-  scheduler->InstructionExecuted(consumed_instructions.at(2));
+  scheduler->InstructionFinished(consumed_instructions.at(2));
   EXPECT_EQ(scheduler->GetReadyInstructions().size(), 0);
 
-  scheduler->InstructionExecuted(consumed_instructions.at(0));
+  scheduler->InstructionFinished(consumed_instructions.at(0));
   auto reduction_line = scheduler->GetReadyInstructions();
   EXPECT_EQ(reduction_line.size(), 1);
   EXPECT_EQ(reduction_line.at(0)->GetName(), "reduction_operand1");
 
-  scheduler->InstructionExecuted(reduction_line.at(0));
+  scheduler->InstructionFinished(reduction_line.at(0));
   reduction_line = scheduler->GetReadyInstructions();
   EXPECT_EQ(reduction_line.size(), 1);
   EXPECT_EQ(reduction_line.at(0)->GetName(), "reduction");
 
-  scheduler->InstructionExecuted(reduction_line.at(0));
+  scheduler->InstructionFinished(reduction_line.at(0));
   reduction_line = scheduler->GetReadyInstructions();
   EXPECT_EQ(reduction_line.size(), 0);
 
-  scheduler->InstructionExecuted(consumed_instructions.at(1));
+  scheduler->InstructionFinished(consumed_instructions.at(1));
   consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 1);
   EXPECT_EQ(consumed_instructions.at(0)->GetName(), "call_func");
 
-  scheduler->InstructionExecuted(consumed_instructions.at(0));
+  scheduler->InstructionFinished(consumed_instructions.at(0));
   consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 1);
   EXPECT_EQ(consumed_instructions.at(0)->GetName(), "body_compute");
 
-  scheduler->InstructionExecuted(consumed_instructions.at(0));
+  scheduler->InstructionFinished(consumed_instructions.at(0));
   consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 1);
   EXPECT_EQ(consumed_instructions.at(0)->GetName(), "call_func");
 
-  scheduler->InstructionExecuted(consumed_instructions.at(0));
+  scheduler->InstructionFinished(consumed_instructions.at(0));
   consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 0);
 }
@@ -246,13 +246,13 @@ TEST(Scheduler, NullInstruction) {
   EXPECT_EQ(consumed_instructions.at(1)->GetName(), "op1");
   EXPECT_EQ(consumed_instructions.at(2)->GetName(), "op2");
 
-  scheduler->InstructionExecuted(consumed_instructions.at(0));
+  scheduler->InstructionFinished(consumed_instructions.at(0));
   EXPECT_EQ(scheduler->GetReadyInstructions().size(), 0);
 
-  scheduler->InstructionExecuted(consumed_instructions.at(1));
+  scheduler->InstructionFinished(consumed_instructions.at(1));
   EXPECT_EQ(scheduler->GetReadyInstructions().size(), 0);
 
-  scheduler->InstructionExecuted(consumed_instructions.at(2));
+  scheduler->InstructionFinished(consumed_instructions.at(2));
   consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 1);
   EXPECT_EQ(consumed_instructions.at(0)->GetName(), "last_instruction");
@@ -358,7 +358,7 @@ entry_subroutine {
   auto consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 1);
   EXPECT_EQ(consumed_instructions.at(0)->GetName(), "first_instruction");
-  scheduler->InstructionExecuted(consumed_instructions.at(0));
+  scheduler->InstructionFinished(consumed_instructions.at(0));
 
   consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 3);
@@ -366,18 +366,18 @@ entry_subroutine {
   EXPECT_EQ(consumed_instructions.at(1)->GetName(), "op2");
   EXPECT_EQ(consumed_instructions.at(2)->GetName(), "called_func");
 
-  scheduler->InstructionExecuted(consumed_instructions.at(0));
+  scheduler->InstructionFinished(consumed_instructions.at(0));
   EXPECT_EQ(scheduler->GetReadyInstructions().size(), 0);
 
-  scheduler->InstructionExecuted(consumed_instructions.at(2));
+  scheduler->InstructionFinished(consumed_instructions.at(2));
   EXPECT_EQ(scheduler->GetReadyInstructions().size(), 0);
 
-  scheduler->InstructionExecuted(consumed_instructions.at(1));
+  scheduler->InstructionFinished(consumed_instructions.at(1));
   consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 1);
   EXPECT_EQ(consumed_instructions.at(0)->GetName(), "sum");
 
-  scheduler->InstructionExecuted(consumed_instructions.at(0));
+  scheduler->InstructionFinished(consumed_instructions.at(0));
   consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 1);
   EXPECT_EQ(consumed_instructions.at(0)->GetName(), "last_instruction");
