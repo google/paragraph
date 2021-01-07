@@ -1,3 +1,5 @@
+package(licenses = ["notice"])
+
 cc_library(
     name = "send_interface",
     srcs = [

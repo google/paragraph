@@ -1,3 +1,5 @@
+package(licenses = ["notice"])
+
 cc_library(
     name = "barrier_interface",
     srcs = [
