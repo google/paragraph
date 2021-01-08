@@ -123,7 +123,7 @@ struct StreamToStatus {
     }                                           \
   } while (0)
 
-#define RETURN_IF_FALSE(val, err_status);       \
+#define RETURN_IF_FALSE(val, err_status)        \
   if (PREDICT_FALSE(!(val)))                    \
     return StreamToStatus(err_status)
 
