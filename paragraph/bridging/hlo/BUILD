@@ -1,5 +1,3 @@
-load("@org_tensorflow//tensorflow:tensorflow.bzl", "tf_cc_binary")
-
 cc_library(
     name = "hlo_converter",
     srcs = [
