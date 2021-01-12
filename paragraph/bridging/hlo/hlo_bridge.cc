@@ -26,12 +26,8 @@
 
 ABSL_FLAG(std::string, hlo_module, "",
           "A path to a file containing the HLO module.");
-ABSL_FLAG(std::string, target_dir, "",
-          "A path to a directory to store ParaGraph graph.");
-ABSL_FLAG(std::string, target_name, "",
-          "A path to a directory to store ParaGraph graph.");
-ABSL_FLAG(std::string, target_extension, ".pb",
-          "A file extension for ParaGraph graph file, '.pb' or '.textproto'.");
+ABSL_FLAG(std::string, output_graph, "",
+          "Output graph file.");
 // defaults from V100 - 125 TF/s, 900 GB/s, NVLink 6 x 200 GB/s
 // TPUv2 - 46 TF/s, 700 GB/s, ICI - 4 x 496 GB/s
 // TPUv3 - 123 TF/s, 900 GB/s, ICI - 6 x 656 GB/s
@@ -52,10 +48,10 @@ int32_t main(int32_t argc, char** argv) {
 
   std::string module_path = absl::GetFlag(FLAGS_hlo_module);
   CHECK_NE(module_path, "");
-  std::string target_path = absl::GetFlag(FLAGS_target_dir);
-  CHECK_NE(target_path, "");
-  std::string target_extension = absl::GetFlag(FLAGS_target_extension);
-  std::string target_name = absl::GetFlag(FLAGS_target_name);
+  std::string output_graph_file = absl::GetFlag(FLAGS_output_graph);
+  CHECK_NE(output_graph_file, "");
+  std::string target_extension = std::filesystem::path(
+      output_graph_file).extension();
   CHECK((target_extension == paragraph::Graph::kBinaryProtoExtension ||
          target_extension == paragraph::Graph::kTextProtoExtension));
   int64_t num_replicas = absl::GetFlag(FLAGS_num_replicas);
@@ -70,13 +66,11 @@ int32_t main(int32_t argc, char** argv) {
   };
 
   std::unique_ptr<xla::HloModule> module;
-  if (!module_path.empty()) {
-    xla::hlo_module_loader_details::Config loader_config;
-    loader_config.num_replicas = num_replicas;
-    auto module_statusor = xla::LoadModuleFromFile(module_path, loader_config);
-    TF_CHECK_OK(module_statusor.status());
-    module = std::move(module_statusor.ValueOrDie());
-  }
+  xla::hlo_module_loader_details::Config loader_config;
+  loader_config.num_replicas = num_replicas;
+  auto module_statusor = xla::LoadModuleFromFile(module_path, loader_config);
+  TF_CHECK_OK(module_statusor.status());
+  module = std::move(module_statusor.ValueOrDie());
 
   auto graph_proto_statusor = HloConverter(module.get(), perf_prop);
   TF_CHECK_OK(graph_proto_statusor.status());
@@ -86,23 +80,6 @@ int32_t main(int32_t argc, char** argv) {
   CHECK_OK(graph_statusor.status());
   std::unique_ptr<paragraph::Graph> graph = std::move(graph_statusor.value());
 
-  std::size_t found = module_path.find_last_of("/");
-  std::string filename;
-  if (target_name.empty()) {
-    filename = module_path.substr(found + 1, module_path.size());
-    found = filename.find_last_of(".");
-    filename = filename.substr(0, found);
-    if (filename.empty()) {
-      filename = graph_proto.name();
-    }
-  } else {
-    filename = target_name;
-  }
-
-  std::string file_path = absl::StrCat(target_path,
-                                       "/",
-                                       filename,
-                                       ".paragraph",
-                                       target_extension);
-  CHECK_OK(graph->WriteToFile(file_path));
+  CHECK_OK(graph->WriteToFile(output_graph_file));
+  return 0;
 }
