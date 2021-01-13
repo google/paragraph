@@ -29,6 +29,7 @@ class SubroutineStateFsm;
   V(kBlocked, "blocked")                                               \
   V(kReady, "ready")                                                   \
   V(kScheduled, "scheduled")                                           \
+  V(kExecuting, "executing")                                           \
   V(kFinished, "finished")
 
 class InstructionFsm {
@@ -58,6 +59,8 @@ class InstructionFsm {
   void SetReady();
   bool IsScheduled();
   void SetScheduled();
+  bool IsExecuting();
+  void SetExecuting();
   bool IsFinished();
   void SetFinished();
 
