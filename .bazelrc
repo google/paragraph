@@ -1,1 +1,2 @@
 build --cxxopt='-std=c++17'
+build --experimental_repo_remote_exec
