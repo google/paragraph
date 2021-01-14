@@ -59,7 +59,7 @@ InstructionFsm::InstructionFsm(GraphScheduler* scheduler,
 bool InstructionFsm::IsUnblockedByOperands() {
   bool unblocked = true;
   for (auto& operand : instruction_->Operands()) {
-    unblocked &= scheduler_->GetFsm(operand).IsExecuted();
+    unblocked &= scheduler_->GetFsm(operand).IsFinished();
   }
   return unblocked;
 }
@@ -70,8 +70,8 @@ bool InstructionFsm::IsReady() { return state_ == State::kReady; }
 void InstructionFsm::SetReady() { state_ = State::kReady; }
 bool InstructionFsm::IsScheduled() { return state_ == State::kScheduled; }
 void InstructionFsm::SetScheduled() { state_ = State::kScheduled; }
-bool InstructionFsm::IsExecuted() { return state_ == State::kExecuted; }
-void InstructionFsm::SetExecuted() { state_ = State::kExecuted; }
+bool InstructionFsm::IsFinished() { return state_ == State::kFinished; }
+void InstructionFsm::SetFinished() { state_ = State::kFinished; }
 
 void InstructionFsm::Reset() {
   if (instruction_->Operands().empty()) {
@@ -90,22 +90,22 @@ absl::Status InstructionFsm::PrepareToSchedule() {
   if (!instruction_->InnerSubroutines().empty()) {
     SetScheduled();
     ASSIGN_OR_RETURN(Subroutine* subroutine, PickSubroutine());
-    // Check if subroutine is not fully executed yet
+    // Check if subroutine is not finished yet
     if (scheduler_->GetFsm(subroutine).GetExecutionCount() > 0 &&
-        !scheduler_->GetFsm(subroutine).IsExecuted()) {
+        !scheduler_->GetFsm(subroutine).IsFinished()) {
       RETURN_IF_ERROR(scheduler_->GetFsm(subroutine).PrepareToSchedule());
     } else {
-      // If we picked this subroutine, and it is fully executed, it means that
+      // If we picked this subroutine, and it is finished, it means that
       // all subroutines are finished and parent instruction can be
-      // marked executed
-      scheduler_->InstructionExecuted(instruction_);
+      // marked finished
+      scheduler_->InstructionFinished(instruction_);
       return absl::OkStatus();
     }
   } else {
     // If we see Null opcode, which is ParaGraph internal opcode, we do not
     // schedule it through scheduler and just instantly execute it
     if (instruction_->GetOpcode() == Opcode::kNull) {
-      scheduler_->InstructionExecuted(instruction_);
+      scheduler_->InstructionFinished(instruction_);
     } else {
       SetReady();
       scheduler_->EnqueueToScheduler(instruction_);
@@ -137,13 +137,13 @@ shim::StatusOr<Subroutine*> InstructionFsm::PickSubroutine() {
     // Reset state if iteration of loop cycle is finished, next available
     auto body_subroutine = instruction_->InnerSubroutines().at(0).get();
     auto condition_subroutine = instruction_->InnerSubroutines().at(1).get();
-    if (scheduler_->GetFsm(body_subroutine).IsExecuted() &&
-        scheduler_->GetFsm(condition_subroutine).IsExecuted() &&
+    if (scheduler_->GetFsm(body_subroutine).IsFinished() &&
+        scheduler_->GetFsm(condition_subroutine).IsFinished() &&
         scheduler_->GetFsm(condition_subroutine).GetExecutionCount() > 0) {
       scheduler_->GetFsm(body_subroutine).Reset(false);
       scheduler_->GetFsm(condition_subroutine).Reset(false);
     }
-    if (!scheduler_->GetFsm(body_subroutine).IsExecuted()) {
+    if (!scheduler_->GetFsm(body_subroutine).IsFinished()) {
       picked_subroutine = body_subroutine;
     } else {
       picked_subroutine = condition_subroutine;
@@ -151,7 +151,7 @@ shim::StatusOr<Subroutine*> InstructionFsm::PickSubroutine() {
   } else if (instruction_->GetOpcode() == Opcode::kCall) {
     for (auto& subroutine : instruction_->InnerSubroutines()) {
       picked_subroutine = subroutine.get();
-      if (!scheduler_->GetFsm(picked_subroutine).IsExecuted() &&
+      if (!scheduler_->GetFsm(picked_subroutine).IsFinished() &&
           scheduler_->GetFsm(picked_subroutine).GetExecutionCount() > 0) {
         break;
       }

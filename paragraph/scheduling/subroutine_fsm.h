@@ -29,7 +29,7 @@ class GraphScheduler;
 #define SUBROUTINE_STATE_LIST(V)                                       \
   V(kBlocked, "blocked")                                               \
   V(kScheduled, "scheduled")                                           \
-  V(kExecuted, "executed")
+  V(kFinished, "finished")
 
 class SubroutineFsm {
   friend class GraphScheduler;
@@ -56,8 +56,8 @@ class SubroutineFsm {
   void SetBlocked();
   bool IsScheduled();
   void SetScheduled();
-  bool IsExecuted();
-  void SetExecuted();
+  bool IsFinished();
+  void SetFinished();
 
   // Getter/setters for subroutine execution count
   int64_t GetExecutionCount() const;
@@ -69,8 +69,8 @@ class SubroutineFsm {
   // Prepares to schedule subroutine
   absl::Status PrepareToSchedule();
 
-  // Updates the state of the subroutine if one of the instructions is executed
-  absl::Status InstructionExecuted(const Instruction* instruction);
+  // Updates the state of the subroutine if one of the instructions is finished
+  absl::Status InstructionFinished(const Instruction* instruction);
 
  private:
   // State of the subrotine
@@ -84,7 +84,7 @@ class SubroutineFsm {
   GraphScheduler* scheduler_;
 
   // Current execution count (how many times subroutines is left to be
-  // executed) and how many instructios are left ot be executed in subroutine
+  // finished) and how many instructios are left to be finished in subroutine
   // Describes the state of subroutine "in flight"
   int64_t current_execution_count_;
   absl::flat_hash_set<const Instruction*> instructions_to_execute_;

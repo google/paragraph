@@ -58,8 +58,8 @@ bool SubroutineFsm::IsBlocked() { return state_ == State::kBlocked; }
 void SubroutineFsm::SetBlocked() { state_ = State::kBlocked; }
 bool SubroutineFsm::IsScheduled() { return state_ == State::kScheduled; }
 void SubroutineFsm::SetScheduled() { state_ = State::kScheduled; }
-bool SubroutineFsm::IsExecuted() { return state_ == State::kExecuted; }
-void SubroutineFsm::SetExecuted() { state_ = State::kExecuted; }
+bool SubroutineFsm::IsFinished() { return state_ == State::kFinished; }
+void SubroutineFsm::SetFinished() { state_ = State::kFinished; }
 
 int64_t SubroutineFsm::GetExecutionCount() const {
   return current_execution_count_;
@@ -79,7 +79,7 @@ void SubroutineFsm::Reset(bool reset_exec_count) {
   }
 }
 
-absl::Status SubroutineFsm::InstructionExecuted(
+absl::Status SubroutineFsm::InstructionFinished(
     const Instruction* instruction) {
   RETURN_IF_FALSE(instructions_to_execute_.erase(instruction) == 1,
                   absl::InternalError) << "Could not find instruction "
@@ -87,7 +87,7 @@ absl::Status SubroutineFsm::InstructionExecuted(
       << " scheduler.";
   if (instructions_to_execute_.empty()) {
     current_execution_count_--;
-    SetExecuted();
+    SetFinished();
     RETURN_IF_FALSE(subroutine_->GetCallingInstruction() != nullptr,
                     absl::InternalError) << "Subroutine " <<
         subroutine_->GetName() <<

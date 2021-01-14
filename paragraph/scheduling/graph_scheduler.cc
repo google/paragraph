@@ -56,9 +56,9 @@ shim::StatusOr<std::unique_ptr<GraphScheduler>> GraphScheduler::Create(
   return scheduler;
 }
 
-void GraphScheduler::InstructionExecuted(Instruction* instruction) {
-  GetFsm(instruction).SetExecuted();
-  CHECK_OK(GetFsm(instruction->GetParent()).InstructionExecuted(instruction));
+void GraphScheduler::InstructionFinished(Instruction* instruction) {
+  GetFsm(instruction).SetFinished();
+  CHECK_OK(GetFsm(instruction->GetParent()).InstructionFinished(instruction));
   for (auto& user : instruction->Users()) {
     if (GetFsm(user).IsUnblockedByOperands()) {
       CHECK_OK(GetFsm(user).PrepareToSchedule());
