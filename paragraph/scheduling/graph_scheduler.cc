@@ -91,8 +91,8 @@ void GraphScheduler::GetReadyInstructions(std::queue<Instruction*>& queue) {
 InstructionFsm& GraphScheduler::GetFsm(const Instruction* instruction) {
   // CHECK that instruction exists in internal map
   // Not Status bacause we believe at this point graph is valid
-  CHECK_NE(instruction_state_map_.find(instruction),
-           instruction_state_map_.end()) << "Instruction "
+  CHECK(instruction_state_map_.find(instruction) !=
+        instruction_state_map_.end()) << "Instruction "
       << instruction->GetName() << " is not found in internal scheduler map."
       << " Graph might not be valid.";
   return instruction_state_map_.at(instruction);
@@ -101,8 +101,8 @@ InstructionFsm& GraphScheduler::GetFsm(const Instruction* instruction) {
 SubroutineFsm& GraphScheduler::GetFsm(const Subroutine* subroutine) {
   // CHECK that subroutine exists in internal map
   // Not Status bacause we believe at this point graph is valid
-  CHECK_NE(subroutine_state_map_.find(subroutine),
-           subroutine_state_map_.end()) << "subroutine "
+  CHECK(subroutine_state_map_.find(subroutine) !=
+        subroutine_state_map_.end()) << "subroutine "
       << subroutine->GetName() << " is not found in internal scheduler map."
       << " Graph might not be valid.";
   return subroutine_state_map_.at(subroutine);

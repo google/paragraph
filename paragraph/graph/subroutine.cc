@@ -111,7 +111,7 @@ void Subroutine::RemoveInstruction(Instruction* instruction) {
   CHECK_EQ(instruction->UserCount(), 0);
 
   auto inst_it = instruction_iterators_.find(instruction);
-  CHECK_NE(inst_it, instruction_iterators_.end());
+  CHECK(inst_it != instruction_iterators_.end());
   CHECK_EQ(instruction, (*inst_it->second).get());
   // Release subroutines
   for (auto& subroutine : instruction->InnerSubroutines()) {
