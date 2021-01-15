@@ -47,7 +47,7 @@ class GraphScheduler {
   // Initializes graph execution and sets time when available instructions are
   // ready. Can be performed much later after scheduler creation.
   // Part of Public API with simulators
-  absl::Status Init(double seconds = 0.0);
+  absl::Status Initialize(double current_time);
 
   // Provides all instructions ready for scheduling to Simulator
   // Part of Public API with simulators
@@ -57,11 +57,11 @@ class GraphScheduler {
 
   // Marks instruction as Finished in Simulator
   // Part of Public API with simulators
-  void InstructionStarted(Instruction* instruction, double seconds);
+  void InstructionStarted(Instruction* instruction, double current_time);
 
   // Marks instruction as Finished in Simulator
   // Part of Public API with simulators
-  void InstructionFinished(Instruction* instruction, double seconds);
+  void InstructionFinished(Instruction* instruction, double current_time);
 
   // Seeds internal PRNG
   // The scheduler makes decisions about the order in which some subroutines are
@@ -73,9 +73,8 @@ class GraphScheduler {
   InstructionFsm& GetFsm(const Instruction* instruction);
   SubroutineFsm& GetFsm(const Subroutine* subroutine);
 
-  // Getter/Setter for current simulation time
-  double GetCurrentTime();
-  void SetCurrentTime(double seconds);
+  // Getter for current simulation time
+  double GetCurrentTime() const;
 
  private:
   // Private constructor to ensure that graph is valid before it gets scheduled,

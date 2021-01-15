@@ -79,11 +79,11 @@ class InstructionFsm {
 
   // Getters/Setters for instruction timings
   double GetTimeReady();
-  void SetTimeReady(double seconds);
+  void SetTimeReady(double current_time);
   double GetTimeStarted();
-  void SetTimeStarted(double seconds);
+  void SetTimeStarted(double current_time);
   double GetTimeFinished();
-  void SetTimeFinished(double seconds);
+  void SetTimeFinished(double current_time);
 
  private:
   // State of the instruction

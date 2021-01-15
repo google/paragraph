@@ -82,24 +82,24 @@ double InstructionFsm::GetTimeReady() {
   return time_ready_;
 }
 
-void InstructionFsm::SetTimeReady(double seconds) {
-  time_ready_ = seconds;
+void InstructionFsm::SetTimeReady(double current_time) {
+  time_ready_ = current_time;
 }
 
 double InstructionFsm::GetTimeStarted() {
   return time_started_;
 }
 
-void InstructionFsm::SetTimeStarted(double seconds) {
-  time_started_ = seconds;
+void InstructionFsm::SetTimeStarted(double current_time) {
+  time_started_ = current_time;
 }
 
 double InstructionFsm::GetTimeFinished() {
   return time_finished_;
 }
 
-void InstructionFsm::SetTimeFinished(double seconds) {
-  time_finished_ = seconds;
+void InstructionFsm::SetTimeFinished(double current_time) {
+  time_finished_ = current_time;
 }
 
 void InstructionFsm::Reset() {

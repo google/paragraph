@@ -98,7 +98,7 @@ TEST(InstructionFsm, Timing) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
-  CHECK_OK(scheduler->Init());
+  CHECK_OK(scheduler->Initialize(0.0));
   auto instr_fsm = scheduler->GetFsm(instr);
 
   EXPECT_EQ(instr_fsm.GetTimeReady(), 0.0);
@@ -133,7 +133,7 @@ TEST(InstructionFsm, StateTransition) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
-  CHECK_OK(scheduler->Init());
+  CHECK_OK(scheduler->Initialize(0.0));
   auto instr_fsm = scheduler->GetFsm(instr);
   EXPECT_TRUE(instr_fsm.IsReady());
 
@@ -169,7 +169,7 @@ TEST(InstructionFsm, CheckUnblocked) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
-  CHECK_OK(scheduler->Init());
+  CHECK_OK(scheduler->Initialize(0.0));
 
   EXPECT_TRUE(scheduler->GetFsm(instr_1).IsUnblockedByOperands());
   EXPECT_FALSE(scheduler->GetFsm(instr_2).IsUnblockedByOperands());
@@ -194,7 +194,7 @@ TEST(InstructionFsm, ResetState) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
-  CHECK_OK(scheduler->Init());
+  CHECK_OK(scheduler->Initialize(0.0));
 
   EXPECT_TRUE(scheduler->GetFsm(instr_1).IsReady());
   EXPECT_TRUE(scheduler->GetFsm(instr_2).IsBlocked());
@@ -247,7 +247,7 @@ TEST(InstructionFsm, PrepareToSchedule) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
-  CHECK_OK(scheduler->Init());
+  CHECK_OK(scheduler->Initialize(0.0));
   // Consume first available instruction, which is dummy
   auto consumed_instructions = scheduler->GetReadyInstructions();
 
@@ -318,7 +318,7 @@ TEST(InstructionFsm, PickSubroutine) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
-  CHECK_OK(scheduler->Init());
+  CHECK_OK(scheduler->Initialize(0.0));
 
   paragraph::Subroutine* picked_subroutine;
   ASSERT_OK_AND_ASSIGN(picked_subroutine,
@@ -385,7 +385,7 @@ TEST(InstructionFsm, PickSubroutineCall) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
-  CHECK_OK(scheduler->Init(10.0));
+  CHECK_OK(scheduler->Initialize(10.0));
   EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeReady(), 10.0);
   EXPECT_EQ(scheduler->GetFsm(instr_2).GetTimeReady(), 0.0);
   EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeReady(), 0.0);

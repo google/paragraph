@@ -40,11 +40,8 @@ TEST(Scheduler, Timing) {
                        paragraph::GraphScheduler::Create(graph.get()));
   EXPECT_EQ(scheduler->GetCurrentTime(), 0.0);
 
-  CHECK_OK(scheduler->Init(10.0));
+  CHECK_OK(scheduler->Initialize(10.0));
   EXPECT_EQ(scheduler->GetCurrentTime(), 10.0);
-
-  scheduler->SetCurrentTime(20.0);
-  EXPECT_EQ(scheduler->GetCurrentTime(), 20.0);
 
   scheduler->InstructionStarted(instr_1, 30.0);
   EXPECT_EQ(scheduler->GetCurrentTime(), 30.0);
@@ -109,7 +106,7 @@ TEST(Scheduler, Creation) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
-  CHECK_OK(scheduler->Init());
+  CHECK_OK(scheduler->Initialize(0.0));
 
   EXPECT_TRUE(scheduler->GetFsm(sub_ptr).IsScheduled());
   EXPECT_TRUE(scheduler->GetFsm(body_sub_ptr).IsScheduled());
@@ -184,7 +181,7 @@ TEST(Scheduler, WhileInstruction) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
-  CHECK_OK(scheduler->Init());
+  CHECK_OK(scheduler->Initialize(0.0));
 
   auto consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 3);
@@ -277,7 +274,7 @@ TEST(Scheduler, NullInstruction) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
-  CHECK_OK(scheduler->Init());
+  CHECK_OK(scheduler->Initialize(0.0));
 
   auto consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 3);
@@ -396,7 +393,7 @@ entry_subroutine {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
-  CHECK_OK(scheduler->Init());
+  CHECK_OK(scheduler->Initialize(0.0));
 
   auto consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 1);
@@ -470,7 +467,7 @@ TEST(Scheduler, GetReadyInstructionQueue) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
-  CHECK_OK(scheduler->Init());
+  CHECK_OK(scheduler->Initialize(0.0));
 
   std::queue<paragraph::Instruction*> queue;
   scheduler->GetReadyInstructions(queue);

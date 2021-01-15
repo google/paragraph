@@ -51,8 +51,9 @@ shim::StatusOr<std::unique_ptr<GraphScheduler>> GraphScheduler::Create(
   return scheduler;
 }
 
-absl::Status GraphScheduler::Init(double seconds) {
-  current_time_ = seconds;
+absl::Status GraphScheduler::Initialize(double current_time) {
+  CHECK_LE(current_time_, current_time);
+  current_time_ = current_time;
   // Reset all FSMs recursively starting from entry subroutine
   GetFsm(graph_->GetEntrySubroutine()).Reset();
   // Moves available to be scheduled instructions from entry subroutine to the
@@ -63,16 +64,18 @@ absl::Status GraphScheduler::Init(double seconds) {
 }
 
 void GraphScheduler::InstructionStarted(
-    Instruction* instruction, double seconds) {
-  current_time_ = seconds;
-  GetFsm(instruction).SetTimeStarted(seconds);
+    Instruction* instruction, double current_time) {
+  CHECK_LE(current_time_, current_time);
+  current_time_ = current_time;
+  GetFsm(instruction).SetTimeStarted(current_time);
 }
 
 void GraphScheduler::InstructionFinished(
-    Instruction* instruction, double seconds) {
-  current_time_ = seconds;
+    Instruction* instruction, double current_time) {
+  CHECK_LE(current_time_, current_time);
+  current_time_ = current_time;
   GetFsm(instruction).SetFinished();
-  GetFsm(instruction).SetTimeFinished(seconds);
+  GetFsm(instruction).SetTimeFinished(current_time);
   CHECK_OK(GetFsm(instruction->GetParent()).InstructionFinished(instruction));
   for (auto& user : instruction->Users()) {
     if (GetFsm(user).IsUnblockedByOperands()) {
@@ -123,8 +126,7 @@ SubroutineFsm& GraphScheduler::GetFsm(const Subroutine* subroutine) {
   return subroutine_state_map_.at(subroutine);
 }
 
-double GraphScheduler::GetCurrentTime() { return current_time_; }
-void GraphScheduler::SetCurrentTime(double seconds) { current_time_ = seconds; }
+double GraphScheduler::GetCurrentTime() const { return current_time_; }
 
 void GraphScheduler::SeedRandom(uint64_t seed) {
   std::seed_seq seq = {(uint32_t)((seed >> 32) & 0xFFFFFFFFlu),
