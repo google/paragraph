@@ -1,3 +1,5 @@
+package(licenses = ["notice"])
+
 cc_library(
     name = "hlo_converter",
     srcs = [
