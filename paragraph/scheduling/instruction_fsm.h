@@ -77,6 +77,14 @@ class InstructionFsm {
   // Picks the next subroutine to schedule among instruction's inner subroutines
   shim::StatusOr<Subroutine*> PickSubroutine();
 
+  // Getters/Setters for instruction timings
+  double GetTimeReady();
+  void SetTimeReady(double seconds);
+  double GetTimeStarted();
+  void SetTimeStarted(double seconds);
+  double GetTimeFinished();
+  void SetTimeFinished(double seconds);
+
  private:
   // State of the instruction
   State state_;
@@ -87,6 +95,11 @@ class InstructionFsm {
   // Pointer to the graph scheduler that keeps scheduling information about
   // all subroutines and instructions in the graph
   GraphScheduler* scheduler_;
+
+  // Instruction timings
+  double time_ready_;
+  double time_started_;
+  double time_finished_;
 };
 
 }  // namespace paragraph

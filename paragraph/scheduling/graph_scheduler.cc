@@ -17,7 +17,8 @@
 namespace paragraph {
 
 GraphScheduler::GraphScheduler(Graph* graph)
-    : graph_(graph) {}
+    : graph_(graph),
+      current_time_(0.0) {}
 
 shim::StatusOr<std::unique_ptr<GraphScheduler>> GraphScheduler::Create(
     Graph* graph) {
@@ -47,17 +48,31 @@ shim::StatusOr<std::unique_ptr<GraphScheduler>> GraphScheduler::Create(
           InstructionFsm(scheduler.get(), instruction.get()));
     }
   }
-  // Reset all FSMs recursively starting from entry subroutine
-  scheduler->GetFsm(scheduler->graph_->GetEntrySubroutine()).Reset();
-  // Moves available to be scheduled instructions from entry subroutine to the
-  // scheduling queue
-  RETURN_IF_ERROR(scheduler->GetFsm(
-      scheduler->graph_->GetEntrySubroutine()).PrepareToSchedule());
   return scheduler;
 }
 
-void GraphScheduler::InstructionFinished(Instruction* instruction) {
+absl::Status GraphScheduler::Init(double seconds) {
+  current_time_ = seconds;
+  // Reset all FSMs recursively starting from entry subroutine
+  GetFsm(graph_->GetEntrySubroutine()).Reset();
+  // Moves available to be scheduled instructions from entry subroutine to the
+  // scheduling queue
+  RETURN_IF_ERROR(
+      GetFsm(graph_->GetEntrySubroutine()).PrepareToSchedule());
+  return absl::OkStatus();
+}
+
+void GraphScheduler::InstructionStarted(
+    Instruction* instruction, double seconds) {
+  current_time_ = seconds;
+  GetFsm(instruction).SetTimeStarted(seconds);
+}
+
+void GraphScheduler::InstructionFinished(
+    Instruction* instruction, double seconds) {
+  current_time_ = seconds;
   GetFsm(instruction).SetFinished();
+  GetFsm(instruction).SetTimeFinished(seconds);
   CHECK_OK(GetFsm(instruction->GetParent()).InstructionFinished(instruction));
   for (auto& user : instruction->Users()) {
     if (GetFsm(user).IsUnblockedByOperands()) {
@@ -107,6 +122,9 @@ SubroutineFsm& GraphScheduler::GetFsm(const Subroutine* subroutine) {
       << " Graph might not be valid.";
   return subroutine_state_map_.at(subroutine);
 }
+
+double GraphScheduler::GetCurrentTime() { return current_time_; }
+void GraphScheduler::SetCurrentTime(double seconds) { current_time_ = seconds; }
 
 void GraphScheduler::SeedRandom(uint64_t seed) {
   std::seed_seq seq = {(uint32_t)((seed >> 32) & 0xFFFFFFFFlu),
