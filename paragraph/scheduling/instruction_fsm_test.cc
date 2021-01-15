@@ -45,11 +45,17 @@ TEST(InstructionFsm, StringToStateConversion) {
                            state_str_3));
   EXPECT_EQ(state_3, paragraph::InstructionFsm::State::kScheduled);
 
-  std::string state_str_4 = "finished";
+  std::string state_str_4 = "executing";
   ASSERT_OK_AND_ASSIGN(paragraph::InstructionFsm::State state_4,
                        paragraph::InstructionFsm::StringToInstructionState(
                            state_str_4));
-  EXPECT_EQ(state_4, paragraph::InstructionFsm::State::kFinished);
+  EXPECT_EQ(state_4, paragraph::InstructionFsm::State::kExecuting);
+
+  std::string state_str_5 = "finished";
+  ASSERT_OK_AND_ASSIGN(paragraph::InstructionFsm::State state_5,
+                       paragraph::InstructionFsm::StringToInstructionState(
+                           state_str_5));
+  EXPECT_EQ(state_5, paragraph::InstructionFsm::State::kFinished);
 }
 
 // Tests InstructionStateToString() method
@@ -70,8 +76,13 @@ TEST(InstructionFsm, StateToStringConversion) {
             "scheduled");
 
   paragraph::InstructionFsm::State state_4 =
-      paragraph::InstructionFsm::State::kFinished;
+      paragraph::InstructionFsm::State::kExecuting;
   EXPECT_EQ(paragraph::InstructionFsm::InstructionStateToString(state_4),
+            "executing");
+
+  paragraph::InstructionFsm::State state_5 =
+      paragraph::InstructionFsm::State::kFinished;
+  EXPECT_EQ(paragraph::InstructionFsm::InstructionStateToString(state_5),
             "finished");
 }
 
@@ -98,6 +109,9 @@ TEST(InstructionFsm, StateTransition) {
 
   instr_fsm.SetScheduled();
   EXPECT_TRUE(instr_fsm.IsScheduled());
+
+  instr_fsm.SetExecuting();
+  EXPECT_TRUE(instr_fsm.IsExecuting());
 
   instr_fsm.SetFinished();
   EXPECT_TRUE(instr_fsm.IsFinished());

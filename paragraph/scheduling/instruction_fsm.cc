@@ -70,6 +70,8 @@ bool InstructionFsm::IsReady() { return state_ == State::kReady; }
 void InstructionFsm::SetReady() { state_ = State::kReady; }
 bool InstructionFsm::IsScheduled() { return state_ == State::kScheduled; }
 void InstructionFsm::SetScheduled() { state_ = State::kScheduled; }
+bool InstructionFsm::IsExecuting() { return state_ == State::kExecuting; }
+void InstructionFsm::SetExecuting() { state_ = State::kExecuting; }
 bool InstructionFsm::IsFinished() { return state_ == State::kFinished; }
 void InstructionFsm::SetFinished() { state_ = State::kFinished; }
 
