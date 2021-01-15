@@ -54,7 +54,10 @@ shim::StatusOr<InstructionFsm::State> InstructionFsm::StringToInstructionState(
 InstructionFsm::InstructionFsm(GraphScheduler* scheduler,
                                Instruction* instruction)
     : instruction_(instruction),
-      scheduler_(scheduler) {}
+      scheduler_(scheduler),
+      time_ready_(0.0),
+      time_started_(0.0),
+      time_finished_(0.0) {}
 
 bool InstructionFsm::IsUnblockedByOperands() {
   bool unblocked = true;
@@ -74,6 +77,30 @@ bool InstructionFsm::IsExecuting() { return state_ == State::kExecuting; }
 void InstructionFsm::SetExecuting() { state_ = State::kExecuting; }
 bool InstructionFsm::IsFinished() { return state_ == State::kFinished; }
 void InstructionFsm::SetFinished() { state_ = State::kFinished; }
+
+double InstructionFsm::GetTimeReady() {
+  return time_ready_;
+}
+
+void InstructionFsm::SetTimeReady(double current_time) {
+  time_ready_ = current_time;
+}
+
+double InstructionFsm::GetTimeStarted() {
+  return time_started_;
+}
+
+void InstructionFsm::SetTimeStarted(double current_time) {
+  time_started_ = current_time;
+}
+
+double InstructionFsm::GetTimeFinished() {
+  return time_finished_;
+}
+
+void InstructionFsm::SetTimeFinished(double current_time) {
+  time_finished_ = current_time;
+}
 
 void InstructionFsm::Reset() {
   if (instruction_->Operands().empty()) {
@@ -100,16 +127,19 @@ absl::Status InstructionFsm::PrepareToSchedule() {
       // If we picked this subroutine, and it is finished, it means that
       // all subroutines are finished and parent instruction can be
       // marked finished
-      scheduler_->InstructionFinished(instruction_);
+      scheduler_->InstructionFinished(instruction_,
+                                      scheduler_->GetCurrentTime());
       return absl::OkStatus();
     }
   } else {
     // If we see Null opcode, which is ParaGraph internal opcode, we do not
     // schedule it through scheduler and just instantly execute it
     if (instruction_->GetOpcode() == Opcode::kNull) {
-      scheduler_->InstructionFinished(instruction_);
+      scheduler_->InstructionFinished(instruction_,
+                                      scheduler_->GetCurrentTime());
     } else {
       SetReady();
+      SetTimeReady(scheduler_->GetCurrentTime());
       scheduler_->EnqueueToScheduler(instruction_);
     }
   }

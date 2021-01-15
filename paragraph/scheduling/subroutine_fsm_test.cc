@@ -76,6 +76,7 @@ TEST(SubroutineFsm, StateTransition) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(0.0));
   EXPECT_TRUE(scheduler->GetFsm(sub_ptr).IsScheduled());
 
   scheduler->GetFsm(sub_ptr).SetBlocked();
@@ -118,6 +119,7 @@ TEST(SubroutineFsm, ExecutionCount) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(0.0));
   EXPECT_EQ(scheduler->GetFsm(sub_ptr).GetExecutionCount(), 1);
   EXPECT_EQ(scheduler->GetFsm(body_ptr).GetExecutionCount(), 3);
   EXPECT_EQ(scheduler->GetFsm(cond_ptr).GetExecutionCount(), 3);
@@ -149,6 +151,7 @@ TEST(SubroutineFsm, ResetState) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(0.0));
 
   EXPECT_TRUE(scheduler->GetFsm(instr_1).IsReady());
   EXPECT_TRUE(scheduler->GetFsm(instr_2).IsBlocked());
@@ -202,6 +205,7 @@ TEST(SubroutineFsm, PrepareToSchedule) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(0.0));
   // Consume first available instruction, which is dummy
   auto consumed_instructions = scheduler->GetReadyInstructions();
 
@@ -224,6 +228,7 @@ TEST(SubroutineFsm, InstructionFinished) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(0.0));
   EXPECT_EQ(scheduler->GetFsm(sub_ptr).GetExecutionCount(), 1);
   EXPECT_TRUE(scheduler->GetFsm(sub_ptr).IsScheduled());
   // Consume first available instruction, which is dummy

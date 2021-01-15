@@ -86,6 +86,41 @@ TEST(InstructionFsm, StateToStringConversion) {
             "finished");
 }
 
+// Test instruction FSM timing setters and getters
+TEST(InstructionFsm, Timing) {
+  auto graph = absl::make_unique<paragraph::Graph>("test_graph", 1);
+  auto sub = absl::make_unique<paragraph::Subroutine>(
+      "test_subroutine", graph.get());
+  auto sub_ptr = sub.get();
+  graph->SetEntrySubroutine(std::move(sub));
+  ASSERT_OK_AND_ASSIGN(auto instr, paragraph::Instruction::Create(
+      paragraph::Opcode::kDelay, "dummy", sub_ptr, true));
+
+  ASSERT_OK_AND_ASSIGN(auto scheduler,
+                       paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(0.0));
+  auto instr_fsm = scheduler->GetFsm(instr);
+
+  EXPECT_EQ(instr_fsm.GetTimeReady(), 0.0);
+  EXPECT_EQ(instr_fsm.GetTimeStarted(), 0.0);
+  EXPECT_EQ(instr_fsm.GetTimeFinished(), 0.0);
+
+  instr_fsm.SetTimeReady(1.0);
+  EXPECT_EQ(instr_fsm.GetTimeReady(), 1.0);
+  EXPECT_EQ(instr_fsm.GetTimeStarted(), 0.0);
+  EXPECT_EQ(instr_fsm.GetTimeFinished(), 0.0);
+
+  instr_fsm.SetTimeStarted(2.0);
+  EXPECT_EQ(instr_fsm.GetTimeReady(), 1.0);
+  EXPECT_EQ(instr_fsm.GetTimeStarted(), 2.0);
+  EXPECT_EQ(instr_fsm.GetTimeFinished(), 0.0);
+
+  instr_fsm.SetTimeFinished(3.0);
+  EXPECT_EQ(instr_fsm.GetTimeReady(), 1.0);
+  EXPECT_EQ(instr_fsm.GetTimeStarted(), 2.0);
+  EXPECT_EQ(instr_fsm.GetTimeFinished(), 3.0);
+}
+
 // Tests instruction FSM state setters and getters
 TEST(InstructionFsm, StateTransition) {
   auto graph = absl::make_unique<paragraph::Graph>("test_graph", 1);
@@ -98,6 +133,7 @@ TEST(InstructionFsm, StateTransition) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(0.0));
   auto instr_fsm = scheduler->GetFsm(instr);
   EXPECT_TRUE(instr_fsm.IsReady());
 
@@ -133,6 +169,7 @@ TEST(InstructionFsm, CheckUnblocked) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(0.0));
 
   EXPECT_TRUE(scheduler->GetFsm(instr_1).IsUnblockedByOperands());
   EXPECT_FALSE(scheduler->GetFsm(instr_2).IsUnblockedByOperands());
@@ -157,6 +194,7 @@ TEST(InstructionFsm, ResetState) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(0.0));
 
   EXPECT_TRUE(scheduler->GetFsm(instr_1).IsReady());
   EXPECT_TRUE(scheduler->GetFsm(instr_2).IsBlocked());
@@ -209,6 +247,7 @@ TEST(InstructionFsm, PrepareToSchedule) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(0.0));
   // Consume first available instruction, which is dummy
   auto consumed_instructions = scheduler->GetReadyInstructions();
 
@@ -279,6 +318,7 @@ TEST(InstructionFsm, PickSubroutine) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(0.0));
 
   paragraph::Subroutine* picked_subroutine;
   ASSERT_OK_AND_ASSIGN(picked_subroutine,
@@ -313,7 +353,7 @@ TEST(InstructionFsm, PickSubroutine) {
   EXPECT_LE(abs(counter.at(0) + counter.at(2) - counter.at(1)), 200);
 }
 
-// Tests PickSubroutine() method with Call instruction
+// Tests PickSubroutine() method with Call instruction and timings
 TEST(InstructionFsm, PickSubroutineCall) {
   auto graph = absl::make_unique<paragraph::Graph>("test_graph", 1);
   auto sub = absl::make_unique<paragraph::Subroutine>(
@@ -345,6 +385,10 @@ TEST(InstructionFsm, PickSubroutineCall) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(10.0));
+  EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeReady(), 10.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_2).GetTimeReady(), 0.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeReady(), 0.0);
   EXPECT_TRUE(scheduler->GetFsm(sub_1_ptr).IsScheduled());
   EXPECT_TRUE(scheduler->GetFsm(sub_2_ptr).IsBlocked());
   EXPECT_TRUE(scheduler->GetFsm(sub_3_ptr).IsBlocked());
@@ -353,17 +397,53 @@ TEST(InstructionFsm, PickSubroutineCall) {
   ASSERT_OK_AND_ASSIGN(picked_subroutine,
                        scheduler->GetFsm(call).PickSubroutine());
   EXPECT_EQ(picked_subroutine->GetName(), "subroutine_1");
-  scheduler->InstructionFinished(instr_1);
+  EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeReady(), 10.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeStarted(), 0.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeFinished(), 0.0);
+
+  scheduler->InstructionStarted(instr_1, 15.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeReady(), 10.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeStarted(), 15.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeFinished(), 0.0);
+
+  scheduler->InstructionFinished(instr_1, 20.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeReady(), 10.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeStarted(), 15.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeFinished(), 20.0);
 
   ASSERT_OK_AND_ASSIGN(picked_subroutine,
                        scheduler->GetFsm(call).PickSubroutine());
   EXPECT_EQ(picked_subroutine->GetName(), "subroutine_2");
-  scheduler->InstructionFinished(instr_2);
+  EXPECT_EQ(scheduler->GetFsm(instr_2).GetTimeReady(), 20.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_2).GetTimeStarted(), 0.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_2).GetTimeFinished(), 0.0);
+
+  scheduler->InstructionStarted(instr_2, 25.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_2).GetTimeReady(), 20.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_2).GetTimeStarted(), 25.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_2).GetTimeFinished(), 0.0);
+
+  scheduler->InstructionFinished(instr_2, 30.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_2).GetTimeReady(), 20.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_2).GetTimeStarted(), 25.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_2).GetTimeFinished(), 30.0);
 
   ASSERT_OK_AND_ASSIGN(picked_subroutine,
                        scheduler->GetFsm(call).PickSubroutine());
   EXPECT_EQ(picked_subroutine->GetName(), "subroutine_3");
-  scheduler->InstructionFinished(instr_3);
+  EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeReady(), 30.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeStarted(), 0.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeFinished(), 0.0);
+
+  scheduler->InstructionStarted(instr_3, 35.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeReady(), 30.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeStarted(), 35.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeFinished(), 0.0);
+
+  scheduler->InstructionFinished(instr_3, 40.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeReady(), 30.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeStarted(), 35.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeFinished(), 40.0);
 
   EXPECT_TRUE(scheduler->GetFsm(call).IsFinished());
 }

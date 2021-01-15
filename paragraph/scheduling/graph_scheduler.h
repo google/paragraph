@@ -39,10 +39,15 @@ class GraphScheduler {
   ~GraphScheduler() = default;
 
   // Creates a new scheduler and verifies the that graph is ready to be
-  // scheduled
+  // scheduled.
   // Part of Public API with simulators
   static shim::StatusOr<std::unique_ptr<GraphScheduler>> Create(
       Graph* graph);
+
+  // Initializes graph execution and sets time when available instructions are
+  // ready. Can be performed much later after scheduler creation.
+  // Part of Public API with simulators
+  absl::Status Initialize(double current_time);
 
   // Provides all instructions ready for scheduling to Simulator
   // Part of Public API with simulators
@@ -52,7 +57,11 @@ class GraphScheduler {
 
   // Marks instruction as Finished in Simulator
   // Part of Public API with simulators
-  void InstructionFinished(Instruction* instruction);
+  void InstructionStarted(Instruction* instruction, double current_time);
+
+  // Marks instruction as Finished in Simulator
+  // Part of Public API with simulators
+  void InstructionFinished(Instruction* instruction, double current_time);
 
   // Seeds internal PRNG
   // The scheduler makes decisions about the order in which some subroutines are
@@ -64,6 +73,9 @@ class GraphScheduler {
   InstructionFsm& GetFsm(const Instruction* instruction);
   SubroutineFsm& GetFsm(const Subroutine* subroutine);
 
+  // Getter for current simulation time
+  double GetCurrentTime() const;
+
  private:
   // Private constructor to ensure that graph is valid before it gets scheduled,
   // and also to link scheduler with instructions/subroutines FSMs
@@ -71,6 +83,10 @@ class GraphScheduler {
 
   // Graph to be scheduled
   Graph* graph_;
+
+  // Current simulation time set and updated by simulator every time when public
+  // API is used.
+  double current_time_;
 
   // Scheduler instruction queue
   std::vector<Instruction*> ready_to_schedule_;

@@ -26,6 +26,31 @@
 #include "paragraph/shim/test_macros.h"
 
 // Tests scheduler creation and access to instructions/subroutines FSMs
+TEST(Scheduler, Timing) {
+  auto graph = absl::make_unique<paragraph::Graph>("test_graph", 1);
+  auto sub = absl::make_unique<paragraph::Subroutine>(
+      "test_subroutine", graph.get());
+  auto sub_ptr = sub.get();
+  graph->SetEntrySubroutine(std::move(sub));
+
+  ASSERT_OK_AND_ASSIGN(auto instr_1, paragraph::Instruction::Create(
+      paragraph::Opcode::kInfeed, "compute_pred1", sub_ptr, true));
+
+  ASSERT_OK_AND_ASSIGN(auto scheduler,
+                       paragraph::GraphScheduler::Create(graph.get()));
+  EXPECT_EQ(scheduler->GetCurrentTime(), 0.0);
+
+  CHECK_OK(scheduler->Initialize(10.0));
+  EXPECT_EQ(scheduler->GetCurrentTime(), 10.0);
+
+  scheduler->InstructionStarted(instr_1, 30.0);
+  EXPECT_EQ(scheduler->GetCurrentTime(), 30.0);
+
+  scheduler->InstructionFinished(instr_1, 40.0);
+  EXPECT_EQ(scheduler->GetCurrentTime(), 40.0);
+}
+
+// Tests scheduler creation and access to instructions/subroutines FSMs
 TEST(Scheduler, Creation) {
   auto graph = absl::make_unique<paragraph::Graph>("test_graph", 1);
   auto sub = absl::make_unique<paragraph::Subroutine>(
@@ -81,6 +106,7 @@ TEST(Scheduler, Creation) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(0.0));
 
   EXPECT_TRUE(scheduler->GetFsm(sub_ptr).IsScheduled());
   EXPECT_TRUE(scheduler->GetFsm(body_sub_ptr).IsScheduled());
@@ -155,6 +181,7 @@ TEST(Scheduler, WhileInstruction) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(0.0));
 
   auto consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 3);
@@ -162,39 +189,47 @@ TEST(Scheduler, WhileInstruction) {
   EXPECT_EQ(consumed_instructions.at(1)->GetName(), "body_compute");
   EXPECT_EQ(consumed_instructions.at(2)->GetName(), "send");
 
-  scheduler->InstructionFinished(consumed_instructions.at(2));
+  scheduler->InstructionStarted(consumed_instructions.at(2), 0.0);
+  scheduler->InstructionFinished(consumed_instructions.at(2), 0.0);
   EXPECT_EQ(scheduler->GetReadyInstructions().size(), 0);
 
-  scheduler->InstructionFinished(consumed_instructions.at(0));
+  scheduler->InstructionStarted(consumed_instructions.at(0), 0.0);
+  scheduler->InstructionFinished(consumed_instructions.at(0), 0.0);
   auto reduction_line = scheduler->GetReadyInstructions();
   EXPECT_EQ(reduction_line.size(), 1);
   EXPECT_EQ(reduction_line.at(0)->GetName(), "reduction_operand1");
 
-  scheduler->InstructionFinished(reduction_line.at(0));
+  scheduler->InstructionStarted(reduction_line.at(0), 0.0);
+  scheduler->InstructionFinished(reduction_line.at(0), 0.0);
   reduction_line = scheduler->GetReadyInstructions();
   EXPECT_EQ(reduction_line.size(), 1);
   EXPECT_EQ(reduction_line.at(0)->GetName(), "reduction");
 
-  scheduler->InstructionFinished(reduction_line.at(0));
+  scheduler->InstructionStarted(reduction_line.at(0), 0.0);
+  scheduler->InstructionFinished(reduction_line.at(0), 0.0);
   reduction_line = scheduler->GetReadyInstructions();
   EXPECT_EQ(reduction_line.size(), 0);
 
-  scheduler->InstructionFinished(consumed_instructions.at(1));
+  scheduler->InstructionStarted(consumed_instructions.at(1), 0.0);
+  scheduler->InstructionFinished(consumed_instructions.at(1), 0.0);
   consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 1);
   EXPECT_EQ(consumed_instructions.at(0)->GetName(), "call_func");
 
-  scheduler->InstructionFinished(consumed_instructions.at(0));
+  scheduler->InstructionStarted(consumed_instructions.at(0), 0.0);
+  scheduler->InstructionFinished(consumed_instructions.at(0), 0.0);
   consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 1);
   EXPECT_EQ(consumed_instructions.at(0)->GetName(), "body_compute");
 
-  scheduler->InstructionFinished(consumed_instructions.at(0));
+  scheduler->InstructionStarted(consumed_instructions.at(0), 0.0);
+  scheduler->InstructionFinished(consumed_instructions.at(0), 0.0);
   consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 1);
   EXPECT_EQ(consumed_instructions.at(0)->GetName(), "call_func");
 
-  scheduler->InstructionFinished(consumed_instructions.at(0));
+  scheduler->InstructionStarted(consumed_instructions.at(0), 0.0);
+  scheduler->InstructionFinished(consumed_instructions.at(0), 0.0);
   consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 0);
 }
@@ -239,6 +274,7 @@ TEST(Scheduler, NullInstruction) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(0.0));
 
   auto consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 3);
@@ -246,13 +282,16 @@ TEST(Scheduler, NullInstruction) {
   EXPECT_EQ(consumed_instructions.at(1)->GetName(), "op1");
   EXPECT_EQ(consumed_instructions.at(2)->GetName(), "op2");
 
-  scheduler->InstructionFinished(consumed_instructions.at(0));
+  scheduler->InstructionStarted(consumed_instructions.at(0), 0.0);
+  scheduler->InstructionFinished(consumed_instructions.at(0), 0.0);
   EXPECT_EQ(scheduler->GetReadyInstructions().size(), 0);
 
-  scheduler->InstructionFinished(consumed_instructions.at(1));
+  scheduler->InstructionStarted(consumed_instructions.at(1), 0.0);
+  scheduler->InstructionFinished(consumed_instructions.at(1), 0.0);
   EXPECT_EQ(scheduler->GetReadyInstructions().size(), 0);
 
-  scheduler->InstructionFinished(consumed_instructions.at(2));
+  scheduler->InstructionStarted(consumed_instructions.at(2), 0.0);
+  scheduler->InstructionFinished(consumed_instructions.at(2), 0.0);
   consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 1);
   EXPECT_EQ(consumed_instructions.at(0)->GetName(), "last_instruction");
@@ -354,11 +393,13 @@ entry_subroutine {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(0.0));
 
   auto consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 1);
   EXPECT_EQ(consumed_instructions.at(0)->GetName(), "first_instruction");
-  scheduler->InstructionFinished(consumed_instructions.at(0));
+  scheduler->InstructionStarted(consumed_instructions.at(0), 0.0);
+  scheduler->InstructionFinished(consumed_instructions.at(0), 0.0);
 
   consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 3);
@@ -366,18 +407,22 @@ entry_subroutine {
   EXPECT_EQ(consumed_instructions.at(1)->GetName(), "op2");
   EXPECT_EQ(consumed_instructions.at(2)->GetName(), "called_func");
 
-  scheduler->InstructionFinished(consumed_instructions.at(0));
+  scheduler->InstructionStarted(consumed_instructions.at(0), 0.0);
+  scheduler->InstructionFinished(consumed_instructions.at(0), 0.0);
   EXPECT_EQ(scheduler->GetReadyInstructions().size(), 0);
 
-  scheduler->InstructionFinished(consumed_instructions.at(2));
+  scheduler->InstructionStarted(consumed_instructions.at(2), 0.0);
+  scheduler->InstructionFinished(consumed_instructions.at(2), 0.0);
   EXPECT_EQ(scheduler->GetReadyInstructions().size(), 0);
 
-  scheduler->InstructionFinished(consumed_instructions.at(1));
+  scheduler->InstructionStarted(consumed_instructions.at(1), 0.0);
+  scheduler->InstructionFinished(consumed_instructions.at(1), 0.0);
   consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 1);
   EXPECT_EQ(consumed_instructions.at(0)->GetName(), "sum");
 
-  scheduler->InstructionFinished(consumed_instructions.at(0));
+  scheduler->InstructionStarted(consumed_instructions.at(0), 0.0);
+  scheduler->InstructionFinished(consumed_instructions.at(0), 0.0);
   consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 1);
   EXPECT_EQ(consumed_instructions.at(0)->GetName(), "last_instruction");
@@ -422,6 +467,7 @@ TEST(Scheduler, GetReadyInstructionQueue) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(0.0));
 
   std::queue<paragraph::Instruction*> queue;
   scheduler->GetReadyInstructions(queue);
