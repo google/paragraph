@@ -111,7 +111,7 @@ absl::Status Instruction::RemoveUser(Instruction* user) {
 
 int64_t Instruction::UserId(Instruction* user) const {
   auto result = user_map_.find(user);
-  CHECK_NE(result, user_map_.end());
+  CHECK(result != user_map_.end());
   return result->second;
 }
 
@@ -200,7 +200,7 @@ void Instruction::RemoveInnerSubroutine(Subroutine* subroutine) {
       inner_subroutines_.begin(), inner_subroutines_.begin(),
       [&](const std::unique_ptr<Subroutine>& subr) {
         return subr.get() == subroutine; });
-  CHECK_NE(subroutine_it, inner_subroutines_.end());
+  CHECK(subroutine_it != inner_subroutines_.end());
   CHECK_EQ(subroutine, (*subroutine_it).get());
   inner_subroutines_.erase(
       std::remove_if(inner_subroutines_.begin(), inner_subroutines_.end(),
@@ -277,8 +277,8 @@ void Instruction::AppendCommunicationGroup(const CommunicationGroup& group) {
       if (opcode_ != Opcode::kSendRecv) {
         // processor id can't appear twice in the same comm group, except for
         // SendRecv which could send to and recv from the same node
-        CHECK_EQ(processor_id_to_index_map_.find(processor_id),
-                 processor_id_to_index_map_.end());
+        CHECK(processor_id_to_index_map_.find(processor_id) ==
+              processor_id_to_index_map_.end());
       }
       ProcessorCoordinates coordinates;
       coordinates.group = comm_group_vector_.size();
@@ -303,8 +303,8 @@ void Instruction::AppendCommunicationGroup(const CommunicationGroup& group) {
       CHECK(false) << "Unknown communication opcode";
     }
     int64_t processor_id = group.at(processor_ind);
-    CHECK_EQ(processor_id_to_index_map_.find(processor_id),
-             processor_id_to_index_map_.end());
+    CHECK(processor_id_to_index_map_.find(processor_id) ==
+          processor_id_to_index_map_.end());
     ProcessorCoordinates coordinates;
     coordinates.group = comm_group_vector_.size();
     coordinates.offset = processor_ind;
