@@ -145,15 +145,6 @@ TEST(ShimMacros, AssignOrReturn) {
   EXPECT_EQ(check_return_42(badstatus).status(), badstatus);
 }
 
-TEST(ShimMacros, AssertOkAndAssign) {
-  // Checks ASSERT_OK_AND_ASSIGN doesn't break with OkStatus
-  absl::Status statusok = absl::OkStatus();
-  ASSERT_OK_AND_ASSIGN(int thing, check_return_42(statusok));
-  ASSERT_OK_AND_ASSIGN(int thing2, check_return_42(statusok));
-  thing++;
-  thing2++;
-}
-
 TEST(ShimMacros, CheckOkAndAssign) {
   // Checks CHECK_OK_AND_ASSIGN doesn't break with OkStatus
   absl::Status statusok = absl::OkStatus();
