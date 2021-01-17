@@ -32,6 +32,7 @@ cc_library(
         ":allgather_interface",
         "//paragraph/translation:factory",
         "//paragraph/translation/barrier:barrier",
+        "@nlohmann_json//:nlohmann_json",
     ],
     visibility = [
         "//paragraph/translation:__subpackages__",

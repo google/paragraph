@@ -34,6 +34,7 @@ cc_library(
         "//paragraph/translation/allgather:allgather",
         "//paragraph/translation/barrier:barrier",
         "//paragraph/translation/reducescatter:reducescatter",
+        "@nlohmann_json//:nlohmann_json",
     ],
     visibility = [
         "//paragraph/translation:__subpackages__",
