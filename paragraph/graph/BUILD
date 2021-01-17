@@ -47,6 +47,7 @@ cc_binary(
     srcs = ["graph_converter.cc"],
     deps = [
         ":graph",
+        "//paragraph/shim:statusor",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
         "@com_google_protobuf//:protobuf",
@@ -71,6 +72,7 @@ cc_test(
         "//paragraph/translation:translation",
         "@googletest//:gtest_main",
         "@nlohmann_json//:nlohmann_json",
+        "@com_google_protobuf//:protobuf",
     ],
 )
 
