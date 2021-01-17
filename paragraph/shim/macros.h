@@ -142,16 +142,6 @@ struct StreamToStatus {
   }                                                 \
   lhs = std::move(statusor.value())
 
-#define ASSERT_OK_AND_ASSIGN(lhs, rexpr)        \
-  ASSERT_OK_AND_ASSIGN_IMPL(CONCAT_MACRO(       \
-      _status_or, __COUNTER__), lhs, rexpr)
-
-#define ASSERT_OK_AND_ASSIGN_IMPL(statusor, lhs, rexpr)  \
-  auto statusor = (rexpr);                               \
-  ASSERT_TRUE(statusor.status().ok()) <<                 \
-      statusor.status();                                 \
-  lhs = std::move(statusor.value())
-
 #define CHECK_OK_AND_ASSIGN(lhs, rexpr)                 \
     CHECK_OK_AND_ASSIGN_IMPL(CONCAT_MACRO(              \
         _status_or, __COUNTER__), lhs, rexpr)

@@ -15,6 +15,8 @@
 #ifndef PARAGRAPH_SHIM_TEST_MACROS_H_
 #define PARAGRAPH_SHIM_TEST_MACROS_H_
 
+#include <utility>
+
 #include "gtest/gtest.h"
 #include "paragraph/shim/macros.h"
 
@@ -23,5 +25,15 @@
   EXPECT_EQ(absl::OkStatus(), (statement))
 #define ASSERT_OK(statement) \
   ASSERT_EQ(absl::OkStatus(), (statement))
+
+#define ASSERT_OK_AND_ASSIGN(lhs, rexpr)        \
+  ASSERT_OK_AND_ASSIGN_IMPL(CONCAT_MACRO(       \
+      _status_or, __COUNTER__), lhs, rexpr)
+
+#define ASSERT_OK_AND_ASSIGN_IMPL(statusor, lhs, rexpr)  \
+  auto statusor = (rexpr);                               \
+  ASSERT_TRUE(statusor.status().ok()) <<                 \
+      statusor.status();                                 \
+  lhs = std::move(statusor.value())
 
 #endif  // PARAGRAPH_SHIM_TEST_MACROS_H_

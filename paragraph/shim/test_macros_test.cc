@@ -28,6 +28,18 @@ StatusOr<std::unique_ptr<int>> ReturnUniquePtr() {
   return absl::make_unique<int>(42);
 }
 
+StatusOr<int> check_return_42(absl::Status in_status) {
+  StatusOr<int> thing;
+  StatusOr<int> thing2;
+  if (in_status.ok()) {
+    thing = StatusOr<int>(42);
+  } else {
+    thing = StatusOr<int>(in_status);
+  }
+  ASSIGN_OR_RETURN(thing2, thing);
+  return thing2;
+}
+
 TEST(ShimMacros, ExpectOk) {
   // Checks that EXPECT_OK(Status::Ok) doesn't break
   StatusOr<std::unique_ptr<int>> thing(ReturnUniquePtr());
@@ -38,6 +50,15 @@ TEST(ShimMacros, AssertOk) {
   // Checks that ASSERT_OK(Status::Ok) doesn't break
   StatusOr<std::unique_ptr<int>> thing(ReturnUniquePtr());
   ASSERT_OK(thing.status());
+}
+
+TEST(ShimMacros, AssertOkAndAssign) {
+  // Checks ASSERT_OK_AND_ASSIGN doesn't break with OkStatus
+  absl::Status statusok = absl::OkStatus();
+  ASSERT_OK_AND_ASSIGN(int thing, check_return_42(statusok));
+  ASSERT_OK_AND_ASSIGN(int thing2, check_return_42(statusok));
+  thing++;
+  thing2++;
 }
 
 }  // namespace
