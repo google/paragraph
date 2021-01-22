@@ -43,6 +43,40 @@ cc_test(
     ],
 )
 
+cc_library(
+    name = "logging",
+    srcs = [
+        "log_entry.cc",
+    ],
+    hdrs = [
+        "log_entry.h",
+    ],
+    deps = [
+        ":scheduler",
+        "//paragraph/graph:graph",
+        "//paragraph/shim:statusor",
+        "@com_google_absl//absl/memory:memory",
+        "@com_google_absl//absl/strings:strings",
+    ],
+    visibility = [
+        "//visibility:public",
+    ],
+)
+
+cc_test(
+    name = "logging_test",
+    size = "small",
+    srcs = [
+        "log_entry_test.cc",
+    ],
+    deps = [
+        ":logging",
+        "//paragraph/shim:test_macros",
+        "@com_google_absl//absl/status",
+        "@googletest//:gtest_main",
+    ],
+)
+
 genrule(
     name = "lint_cc",
     srcs = glob([
