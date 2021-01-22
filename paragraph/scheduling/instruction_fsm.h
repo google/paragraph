@@ -53,15 +53,15 @@ class InstructionFsm {
       const std::string& state_name);
 
   // Getters and setters for instruction scheduler state
-  bool IsBlocked();
+  bool IsBlocked() const;
   void SetBlocked();
-  bool IsReady();
+  bool IsReady() const;
   void SetReady();
-  bool IsScheduled();
+  bool IsScheduled() const;
   void SetScheduled();
-  bool IsExecuting();
+  bool IsExecuting() const;
   void SetExecuting();
-  bool IsFinished();
+  bool IsFinished() const;
   void SetFinished();
 
   // Resets instruction state setting it to Blocked or Ready depending on
@@ -69,7 +69,7 @@ class InstructionFsm {
   void Reset();
 
   // Checks whether instruction is blocked by its operands
-  bool IsUnblockedByOperands();
+  bool IsUnblockedByOperands() const;
 
   // Prepares to schedule either the instruction or its inner subroutine
   absl::Status PrepareToSchedule();
@@ -78,11 +78,11 @@ class InstructionFsm {
   shim::StatusOr<Subroutine*> PickSubroutine();
 
   // Getters/Setters for instruction timings
-  double GetTimeReady();
+  double GetTimeReady() const;
   void SetTimeReady(double current_time);
-  double GetTimeStarted();
+  double GetTimeStarted() const;
   void SetTimeStarted(double current_time);
-  double GetTimeFinished();
+  double GetTimeFinished() const;
   void SetTimeFinished(double current_time);
 
  private:

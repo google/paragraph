@@ -52,11 +52,11 @@ class SubroutineFsm {
       const std::string& state_name);
 
   // Getters and setters for subroutine scheduler state
-  bool IsBlocked();
+  bool IsBlocked() const;
   void SetBlocked();
-  bool IsScheduled();
+  bool IsScheduled() const;
   void SetScheduled();
-  bool IsFinished();
+  bool IsFinished() const;
   void SetFinished();
 
   // Getter/setters for subroutine execution count
