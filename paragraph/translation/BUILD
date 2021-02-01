@@ -11,6 +11,7 @@ cc_library(
     deps = [
         ":translator",
         "//paragraph/graph:graph",
+        "//paragraph/shim:statusor",
         "//paragraph/translation/allgather:allgather_interface",
         "//paragraph/translation/allreduce:allreduce_interface",
         "//paragraph/translation/barrier:barrier_interface",
@@ -64,6 +65,7 @@ cc_library(
         "//paragraph/translation/send:send",
         "//paragraph/translation/sendrecv:sendrecv",
         "//paragraph/graph:graph",
+        "//paragraph/shim:statusor",
         "@com_google_absl//absl/memory:memory",
         "@nlohmann_json//:nlohmann_json",
     ],
