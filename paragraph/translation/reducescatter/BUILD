@@ -33,6 +33,7 @@ cc_library(
         "//paragraph/translation:factory",
         "//paragraph/translation/barrier:barrier",
         "//paragraph/translation/barrier:barrier_interface",
+        "@libfactory//:factory",
         "@nlohmann_json//:nlohmann_json",
     ],
     visibility = [

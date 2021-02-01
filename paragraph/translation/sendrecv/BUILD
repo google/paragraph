@@ -31,6 +31,7 @@ cc_library(
     deps = [
         "sendrecv_interface",
         "//paragraph/translation:factory",
+        "@libfactory//:factory",
         "@nlohmann_json//:nlohmann_json",
     ],
     visibility = [
