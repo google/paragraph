@@ -37,6 +37,7 @@ cc_library(
         "//paragraph/translation/barrier:barrier_interface",
         "//paragraph/translation/reducescatter:reducescatter",
         "//paragraph/translation/reducescatter:reducescatter_interface",
+        "@libfactory//:factory",
         "@nlohmann_json//:nlohmann_json",
     ],
     visibility = [

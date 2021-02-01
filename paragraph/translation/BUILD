@@ -10,6 +10,7 @@ cc_library(
     ],
     deps = [
         ":translator",
+        "//paragraph/graph:graph",
         "//paragraph/translation/allgather:allgather_interface",
         "//paragraph/translation/allreduce:allreduce_interface",
         "//paragraph/translation/barrier:barrier_interface",
@@ -19,7 +20,7 @@ cc_library(
         "//paragraph/translation/sendrecv:sendrecv_interface",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/memory:memory",
-        "@libfactory//:factory",
+        "@com_google_absl//absl/strings",
         "@nlohmann_json//:nlohmann_json",
     ],
     visibility = [
@@ -62,6 +63,7 @@ cc_library(
         "//paragraph/translation/reducescatter:reducescatter",
         "//paragraph/translation/send:send",
         "//paragraph/translation/sendrecv:sendrecv",
+        "//paragraph/graph:graph",
         "@com_google_absl//absl/memory:memory",
         "@nlohmann_json//:nlohmann_json",
     ],
