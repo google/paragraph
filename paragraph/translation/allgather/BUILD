@@ -15,7 +15,7 @@ cc_library(
         "@nlohmann_json//:nlohmann_json",
     ],
     visibility = [
-        "//paragraph/translation:__pkg__",
+        "//paragraph/translation:__subpackages__",
     ],
     alwayslink = 1,
 )
@@ -32,6 +32,7 @@ cc_library(
         ":allgather_interface",
         "//paragraph/translation:factory",
         "//paragraph/translation/barrier:barrier",
+        "//paragraph/translation/barrier:barrier_interface",
         "@nlohmann_json//:nlohmann_json",
     ],
     visibility = [

@@ -15,7 +15,7 @@ cc_library(
         "@nlohmann_json//:nlohmann_json",
     ],
     visibility = [
-        "//paragraph/translation:__pkg__",
+        "//paragraph/translation:__subpackages__",
     ],
     alwayslink = 1,
 )
