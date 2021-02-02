@@ -104,6 +104,8 @@ cc_test(
     deps = [
         ":translation",
         "//paragraph/shim:test_macros",
+        "//paragraph/translation:factory",
+        "@com_google_protobuf//:protobuf",
         "@googletest//:gtest_main",
         "@nlohmann_json//:nlohmann_json",
     ],

@@ -70,6 +70,8 @@ cc_test(
         ":graph",
         "//paragraph/shim:test_macros",
         "//paragraph/translation:translation",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings:str_format",
         "@googletest//:gtest_main",
         "@nlohmann_json//:nlohmann_json",
         "@com_google_protobuf//:protobuf",

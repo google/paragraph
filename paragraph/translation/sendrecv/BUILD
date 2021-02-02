@@ -49,6 +49,8 @@ cc_test(
     deps = [
         ":sendrecv",
         "//paragraph/shim:test_macros",
+        "//paragraph/translation:factory",
+        "@com_google_protobuf//:protobuf",
         "@googletest//:gtest_main",
     ],
     visibility = [
