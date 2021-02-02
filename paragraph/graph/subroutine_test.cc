@@ -427,7 +427,6 @@ TEST(Subroutine, NestedRemoveInstruction) {
   EXPECT_EQ(inner_subroutine_ptr->InstructionCount(), 3);
   main_subroutine->RemoveInstruction(main_instr);
   EXPECT_EQ(main_subroutine->InstructionCount(), 0);
-  EXPECT_EQ(inner_subroutine_ptr->InstructionCount(), 0);
 }
 
 // Tests ScalePerformance() method

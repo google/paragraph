@@ -118,9 +118,9 @@ void Subroutine::RemoveInstruction(Instruction* instruction) {
     instruction->RemoveInnerSubroutine(subroutine.get());
   }
   instruction->SetParent(nullptr);
+  auto list_iter = inst_it->second;
   instruction_iterators_.erase(inst_it);
-  instructions_.erase(inst_it->second);
-  inst_it->second->release();
+  instructions_.erase(list_iter);
 }
 
 absl::Status Subroutine::ReplaceInstructionWithInstructionList(
