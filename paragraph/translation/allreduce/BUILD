@@ -55,6 +55,8 @@ cc_test(
     deps = [
         ":allreduce",
         "//paragraph/shim:test_macros",
+        "//paragraph/translation:factory",
+        "@com_google_protobuf//:protobuf",
         "@googletest//:gtest_main",
     ],
     visibility = [

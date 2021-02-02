@@ -35,8 +35,10 @@ cc_test(
     ],
     deps = [
         ":scheduler",
+        "//paragraph/graph:graph",
         "//paragraph/shim:test_macros",
         "@com_google_absl//absl/status",
+        "@com_google_protobuf//:protobuf",
         "@googletest//:gtest_main",
     ],
 )
