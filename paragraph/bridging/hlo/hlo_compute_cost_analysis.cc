@@ -82,17 +82,23 @@ xla::Status ComputeCostAnalysis::Postprocess(
   return xla::Status::OK();
 }
 
+int64_t default_value = 0;
 xla::Status ComputeCostAnalysis::UpdateInstructionProperties() {
   for (auto& map_it : hlo_properties_) {
     const xla::HloInstruction* hlo = map_it.first;
     Properties hlo_property = {
-      { kFlopsKey, std::max(flop_count(*hlo), 0LL) },
-      { kTranscendentalsKey, std::max(transcendental_count(*hlo), 0LL) },
-      { kBytesAccessedKey, std::max(bytes_accessed(*hlo), 0LL) },
-      { kOperandBytesAccessedKey, std::max(GetBytesRead(*hlo), 0LL) },
-      { kOutputBytesAccessedKey, std::max(GetBytesWritten(*hlo), 0LL) },
-      { kOptimalSecondsKey, std::max(static_cast<double>(optimal_seconds(*hlo)),
-                                     0.0) }
+      { kFlopsKey, std::max(static_cast<int64_t>(
+          flop_count(*hlo)), default_value) },
+      { kTranscendentalsKey, std::max(static_cast<int64_t>(
+          transcendental_count(*hlo)), default_value) },
+      { kBytesAccessedKey, std::max(static_cast<int64_t>(
+          bytes_accessed(*hlo)), default_value) },
+      { kOperandBytesAccessedKey, std::max(static_cast<int64_t>(
+          GetBytesRead(*hlo)), default_value) },
+      { kOutputBytesAccessedKey, std::max(static_cast<int64_t>(
+          GetBytesWritten(*hlo)), default_value) },
+      { kOptimalSecondsKey, std::max(static_cast<double>(
+          optimal_seconds(*hlo)), 0.0) }
     };
     // HLO cost analysis tends to miss bytes written by AllReduce
     if (hlo->opcode() == xla::HloOpcode::kAllReduce) {
