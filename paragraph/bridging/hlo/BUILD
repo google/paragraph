@@ -1,4 +1,7 @@
-package(licenses = ["notice"])
+package(
+    features = ["-layering_check"],
+    licenses = ["notice"],
+)
 
 cc_library(
     name = "hlo_converter",
