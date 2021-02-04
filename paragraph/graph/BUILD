@@ -1,6 +1,6 @@
-package(licenses = ["notice"])
-
 load("@rules_proto//proto:defs.bzl", "proto_library")
+
+package(licenses = ["notice"])
 
 proto_library(
     name = "graph_proto",

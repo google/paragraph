@@ -23,14 +23,14 @@ namespace paragraph {
 
 constexpr int64_t Subroutine::kDefaultId;
 
-Subroutine::Subroutine(const std::string& name, Graph* parent)
+Subroutine::Subroutine(const std::string& name, Graph* graph)
     : name_(name),
       id_(kDefaultId),
       execution_probability_(1.0),
       execution_count_(1),
       root_instruction_(nullptr),
       calling_instruction_(nullptr),
-      graph_(parent) {}
+      graph_(graph) {}
 
 absl::Status Subroutine::AddInstruction(
     std::unique_ptr<Instruction> instruction) {

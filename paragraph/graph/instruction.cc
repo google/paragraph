@@ -521,11 +521,11 @@ absl::Status Instruction::ValidateCommon() const {
                     absl::InternalError) << "While instruction " <<
         name_ << " should have exactly 2 subroutines.";
   } else if (opcode_ == Opcode::kCall) {
-    RETURN_IF_FALSE(inner_subroutines_.size() >= 1,
+    RETURN_IF_FALSE(!inner_subroutines_.empty(),
                     absl::InternalError) << "Call instruction " <<
         name_ << " should have at least 1 subroutines.";
   } else if (opcode_ == Opcode::kDelay) {
-    RETURN_IF_FALSE(inner_subroutines_.size() == 0,
+    RETURN_IF_FALSE(inner_subroutines_.empty(),
                     absl::InternalError) << "Delay instruction " <<
         name_ << " should have no subroutines.";
   } else {
