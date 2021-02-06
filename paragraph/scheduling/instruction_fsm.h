@@ -85,6 +85,8 @@ class InstructionFsm {
   double GetTimeFinished() const;
   void SetTimeFinished(double current_time);
 
+  std::string ToCsv(const std::string& delimeter = ",") const;
+
  private:
   // State of the instruction
   State state_;

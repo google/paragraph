@@ -21,11 +21,12 @@ GraphScheduler::GraphScheduler(Graph* graph)
       current_time_(0.0) {}
 
 shim::StatusOr<std::unique_ptr<GraphScheduler>> GraphScheduler::Create(
-    Graph* graph) {
+    Graph* graph, const std::string& filename) {
   // Check that graph is valid and can be scheduled
   RETURN_IF_ERROR(graph->ValidateIndividualized());
   // Using `new` and WrapUnique to access a non-public constructor.
   auto scheduler = absl::WrapUnique(new GraphScheduler(graph));
+  ASSIGN_OR_RETURN(scheduler->logger_, Logger::Create(filename));
 
   // Create all FSMs for instructions and subroutines
   for (const auto& subroutine : scheduler->graph_->Subroutines()) {
@@ -81,6 +82,9 @@ void GraphScheduler::InstructionFinished(
     if (GetFsm(user).IsUnblockedByOperands()) {
       CHECK_OK(GetFsm(user).PrepareToSchedule());
     }
+  }
+  if (logger_->IsAvailable()) {
+    CHECK_OK(logger_->AppendToCsv(GetFsm(instruction)));
   }
 }
 

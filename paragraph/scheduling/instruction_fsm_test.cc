@@ -447,3 +447,26 @@ TEST(InstructionFsm, PickSubroutineCall) {
 
   EXPECT_TRUE(scheduler->GetFsm(call).IsFinished());
 }
+
+// Test Log Entry creation
+TEST(InstructionFsm, ToCsv) {
+  auto graph = absl::make_unique<paragraph::Graph>("test_graph", 1);
+  auto sub = absl::make_unique<paragraph::Subroutine>(
+      "test_subroutine", graph.get());
+  auto sub_ptr = sub.get();
+  graph->SetEntrySubroutine(std::move(sub));
+  ASSERT_OK_AND_ASSIGN(auto instr, paragraph::Instruction::Create(
+      paragraph::Opcode::kDelay, "dummy", sub_ptr, true));
+
+  ASSERT_OK_AND_ASSIGN(auto scheduler,
+                       paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(0.0));
+
+  auto instr_fsm = scheduler->GetFsm(instr);
+  instr_fsm.SetTimeReady(1.1);
+  instr_fsm.SetTimeStarted(2.2);
+  instr_fsm.SetTimeFinished(3.3);
+
+  EXPECT_EQ(instr_fsm.ToCsv(),
+            "1,dummy,delay,1.1,2.2,3.3");
+}

@@ -5,11 +5,13 @@ cc_library(
     srcs = [
         "graph_scheduler.cc",
         "instruction_fsm.cc",
+        "logger.cc",
         "subroutine_fsm.cc",
     ],
     hdrs = [
         "graph_scheduler.h",
         "instruction_fsm.h",
+        "logger.h",
         "subroutine_fsm.h",
     ],
     deps = [
@@ -31,6 +33,7 @@ cc_test(
     srcs = [
         "graph_scheduler_test.cc",
         "instruction_fsm_test.cc",
+        "logger_test.cc",
         "subroutine_fsm_test.cc",
     ],
     deps = [
@@ -39,40 +42,6 @@ cc_test(
         "//paragraph/shim:test_macros",
         "@com_google_absl//absl/status",
         "@com_google_protobuf//:protobuf",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_library(
-    name = "logging",
-    srcs = [
-        "log_entry.cc",
-    ],
-    hdrs = [
-        "log_entry.h",
-    ],
-    deps = [
-        ":scheduler",
-        "//paragraph/graph:graph",
-        "//paragraph/shim:statusor",
-        "@com_google_absl//absl/memory:memory",
-        "@com_google_absl//absl/strings:strings",
-    ],
-    visibility = [
-        "//visibility:public",
-    ],
-)
-
-cc_test(
-    name = "logging_test",
-    size = "small",
-    srcs = [
-        "log_entry_test.cc",
-    ],
-    deps = [
-        ":logging",
-        "//paragraph/shim:test_macros",
-        "@com_google_absl//absl/status",
         "@googletest//:gtest_main",
     ],
 )
