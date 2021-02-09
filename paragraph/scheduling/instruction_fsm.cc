@@ -59,7 +59,7 @@ InstructionFsm::InstructionFsm(GraphScheduler* scheduler,
       time_started_(0.0),
       time_finished_(0.0) {}
 
-bool InstructionFsm::IsUnblockedByOperands() {
+bool InstructionFsm::IsUnblockedByOperands() const {
   bool unblocked = true;
   for (auto& operand : instruction_->Operands()) {
     unblocked &= scheduler_->GetFsm(operand).IsFinished();
@@ -67,18 +67,35 @@ bool InstructionFsm::IsUnblockedByOperands() {
   return unblocked;
 }
 
-bool InstructionFsm::IsBlocked() { return state_ == State::kBlocked; }
+bool InstructionFsm::IsBlocked() const {
+  return state_ == State::kBlocked;
+}
+
 void InstructionFsm::SetBlocked() { state_ = State::kBlocked; }
-bool InstructionFsm::IsReady() { return state_ == State::kReady; }
+
+bool InstructionFsm::IsReady() const { return state_ == State::kReady; }
+
 void InstructionFsm::SetReady() { state_ = State::kReady; }
-bool InstructionFsm::IsScheduled() { return state_ == State::kScheduled; }
+
+bool InstructionFsm::IsScheduled() const {
+  return state_ == State::kScheduled;
+}
+
 void InstructionFsm::SetScheduled() { state_ = State::kScheduled; }
-bool InstructionFsm::IsExecuting() { return state_ == State::kExecuting; }
+
+bool InstructionFsm::IsExecuting() const {
+  return state_ == State::kExecuting;
+}
+
 void InstructionFsm::SetExecuting() { state_ = State::kExecuting; }
-bool InstructionFsm::IsFinished() { return state_ == State::kFinished; }
+
+bool InstructionFsm::IsFinished() const {
+  return state_ == State::kFinished;
+}
+
 void InstructionFsm::SetFinished() { state_ = State::kFinished; }
 
-double InstructionFsm::GetTimeReady() {
+double InstructionFsm::GetTimeReady() const {
   return time_ready_;
 }
 
@@ -86,7 +103,7 @@ void InstructionFsm::SetTimeReady(double current_time) {
   time_ready_ = current_time;
 }
 
-double InstructionFsm::GetTimeStarted() {
+double InstructionFsm::GetTimeStarted() const {
   return time_started_;
 }
 
@@ -94,7 +111,7 @@ void InstructionFsm::SetTimeStarted(double current_time) {
   time_started_ = current_time;
 }
 
-double InstructionFsm::GetTimeFinished() {
+double InstructionFsm::GetTimeFinished() const {
   return time_finished_;
 }
 

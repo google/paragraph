@@ -54,11 +54,22 @@ SubroutineFsm::SubroutineFsm(GraphScheduler* scheduler,
     : subroutine_(subroutine),
       scheduler_(scheduler) {}
 
-bool SubroutineFsm::IsBlocked() { return state_ == State::kBlocked; }
+bool SubroutineFsm::IsBlocked() const {
+  return state_ == State::kBlocked;
+}
+
 void SubroutineFsm::SetBlocked() { state_ = State::kBlocked; }
-bool SubroutineFsm::IsScheduled() { return state_ == State::kScheduled; }
+
+bool SubroutineFsm::IsScheduled() const {
+  return state_ == State::kScheduled;
+}
+
 void SubroutineFsm::SetScheduled() { state_ = State::kScheduled; }
-bool SubroutineFsm::IsFinished() { return state_ == State::kFinished; }
+
+bool SubroutineFsm::IsFinished() const {
+  return state_ == State::kFinished;
+}
+
 void SubroutineFsm::SetFinished() { state_ = State::kFinished; }
 
 int64_t SubroutineFsm::GetExecutionCount() const {
