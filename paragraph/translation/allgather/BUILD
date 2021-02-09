@@ -23,9 +23,11 @@ cc_library(
 cc_library(
     name = "allgather",
     srcs = [
+        "bidir_ring_allgather_translator.cc",
         "unidir_ring_allgather_translator.cc",
     ],
     hdrs = [
+        "bidir_ring_allgather_translator.h",
         "unidir_ring_allgather_translator.h",
     ],
     deps = [
@@ -46,6 +48,7 @@ cc_test(
     name = "allgather_test",
     size = "small",
     srcs = [
+        "bidir_ring_allgather_translator_test.cc",
         "unidir_ring_allgather_translator_test.cc",
     ],
     deps = [
