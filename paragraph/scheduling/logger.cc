@@ -1,4 +1,4 @@
-/* Copyright 2020 Google LLC
+/* Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
 
+#include "paragraph/graph/graph.h"
 #include "paragraph/scheduling/instruction_fsm.h"
 
 namespace paragraph {
@@ -64,8 +65,7 @@ absl::Status Logger::SetFilename(const std::string& filename) {
 
 absl::Status Logger::AppendToCsv(const InstructionFsm& instruction_fsm) {
   RETURN_IF_ERROR(OpenFile());
-  std::cout << instruction_fsm.ToCsv() << std::endl;
-  ostream_ << instruction_fsm.ToCsv() << std::endl;
+  ostream_ << MakeCsvLine(instruction_fsm) << std::endl;
   if (ostream_.fail() || ostream_.bad()) {
     return absl::InternalError(
         "Failed to write trace to CSV file: " + filename_);
@@ -84,7 +84,7 @@ absl::Status Logger::OpenFile() {
       return absl::InvalidArgumentError(
           "File '" + filename_ + "' could not be opened.");
     }
-    ostream_.open(filename_, std::ios::out | std::ios::app);
+    ostream_.open(filename_, std::ios::out | std::ios::trunc);
     RETURN_IF_FALSE(ostream_.is_open(), absl::InternalError) <<
         "File '" << filename_ << "' could not be opened.";
   }
@@ -100,6 +100,31 @@ absl::Status Logger::InitializeCsv() {
                                "': file could not be opened.");
   }
   return absl::OkStatus();
+}
+
+std::string Logger::MakeCsvLine(const InstructionFsm& fsm,
+                                const std::string& delimiter) {
+  CHECK(fsm.GetInstruction()->GetGraph() != nullptr);
+  std::ostringstream str_stream;
+  // We store 12 decimal digits of precision, which is equivalent to
+  // 1 picosecond precision for each second of time
+  str_stream << std::fixed << std::setprecision(12);
+  str_stream << fsm.GetTimeReady();
+  std::string time_ready_str = str_stream.str();
+  str_stream.str("");
+  str_stream << fsm.GetTimeStarted();
+  std::string time_started_str = str_stream.str();
+  str_stream.str("");
+  str_stream << fsm.GetTimeFinished();
+  std::string time_finished_str = str_stream.str();
+  std::string log_entry_str = absl::StrCat(
+      fsm.GetInstruction()->GetGraph()->GetProcessorId(), delimiter,
+      fsm.GetInstruction()->GetName(), delimiter,
+      OpcodeToString(fsm.GetInstruction()->GetOpcode()), delimiter,
+      time_ready_str, delimiter,
+      time_started_str, delimiter,
+      time_finished_str);
+  return log_entry_str;
 }
 
 }  // namespace paragraph

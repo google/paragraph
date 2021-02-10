@@ -133,6 +133,10 @@ void InstructionFsm::Reset() {
   }
 }
 
+const Instruction* InstructionFsm::GetInstruction() const {
+  return instruction_;
+}
+
 absl::Status InstructionFsm::PrepareToSchedule() {
   // If instruction has inner subroutines, we don't schedule it directly,
   // instead we schedule inner subroutines and its instructionss
@@ -217,18 +221,6 @@ shim::StatusOr<Subroutine*> InstructionFsm::PickSubroutine() {
     picked_subroutine = instruction_->InnerSubroutines().at(0).get();
   }
   return picked_subroutine;
-}
-
-std::string InstructionFsm::ToCsv(const std::string& delimeter) const {
-  CHECK(instruction_->GetGraph() != nullptr);
-  std::string log_entry_str = absl::StrCat(
-      instruction_->GetGraph()->GetProcessorId(), delimeter,
-      instruction_->GetName(), delimeter,
-      OpcodeToString(instruction_->GetOpcode()), delimeter,
-      absl::SixDigits(time_ready_), delimeter,
-      absl::SixDigits(time_started_), delimeter,
-      absl::SixDigits(time_finished_));
-  return log_entry_str;
 }
 
 }  // namespace paragraph

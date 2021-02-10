@@ -89,8 +89,8 @@ class GraphScheduler {
   // API is used.
   double current_time_;
 
-  // Logger that logs to file all the instruction timings during the graph
-  // execution
+  // Logger that collects all the information about the instruction timings
+  // during the graph execution
   std::unique_ptr<Logger> logger_;
 
   // Scheduler instruction queue

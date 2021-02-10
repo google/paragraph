@@ -1,4 +1,4 @@
-/* Copyright 2020 Google LLC
+/* Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,12 @@
 #include "paragraph/scheduling/graph_scheduler.h"
 #include "paragraph/shim/test_macros.h"
 
-std::string get_testfile_name(const std::string& _basename) {
+std::string get_testfile_name(const std::string& basename) {
   std::string f = std::getenv("TEST_TMPDIR");
   if (f.back() != '/') {
     f += '/';
   }
-  f += _basename;
+  f += basename;
   return f;
 }
 
@@ -62,6 +62,30 @@ TEST(Logger, Create) {
             "processor_id,instruction_name,opcode,ready,started,finished");
 }
 
+// Test Log Entry creation
+TEST(Logger, MakeCsvLine) {
+  auto graph = absl::make_unique<paragraph::Graph>("test_graph", 1);
+  auto sub = absl::make_unique<paragraph::Subroutine>(
+      "test_subroutine", graph.get());
+  auto sub_ptr = sub.get();
+  graph->SetEntrySubroutine(std::move(sub));
+  ASSERT_OK_AND_ASSIGN(auto instr, paragraph::Instruction::Create(
+      paragraph::Opcode::kDelay, "dummy", sub_ptr, true));
+
+  ASSERT_OK_AND_ASSIGN(auto scheduler,
+                       paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(0.0));
+  ASSERT_OK_AND_ASSIGN(auto logger_1, paragraph::Logger::Create());
+
+  auto instr_fsm = scheduler->GetFsm(instr);
+  instr_fsm.SetTimeReady(1.1);
+  instr_fsm.SetTimeStarted(2.2);
+  instr_fsm.SetTimeFinished(3.123456789012345);
+
+  EXPECT_EQ(logger_1->MakeCsvLine(instr_fsm),
+            "1,dummy,delay,1.100000000000,2.200000000000,3.123456789012");
+}
+
 // Tests graph writing to and reading from file
 TEST(Logger, FileIO) {
   auto graph = absl::make_unique<paragraph::Graph>("test_graph", 1);
@@ -79,7 +103,7 @@ TEST(Logger, FileIO) {
   auto instr_fsm = scheduler->GetFsm(instr);
   instr_fsm.SetTimeReady(1.1);
   instr_fsm.SetTimeStarted(2.2);
-  instr_fsm.SetTimeFinished(3.3);
+  instr_fsm.SetTimeFinished(3.123456789012345);
 
   std::filesystem::remove(get_testfile_name("logger_test.csv"));
   EXPECT_FALSE(std::filesystem::exists(get_testfile_name("logger_test.csv")));
@@ -89,7 +113,7 @@ TEST(Logger, FileIO) {
 
   instr_fsm.SetTimeReady(10.1);
   instr_fsm.SetTimeStarted(20.2);
-  instr_fsm.SetTimeFinished(30.3);
+  instr_fsm.SetTimeFinished(30.123456789012345);
   EXPECT_OK(logger->AppendToCsv(instr_fsm));
   logger->FlushToFile();
 
@@ -102,10 +126,10 @@ TEST(Logger, FileIO) {
             "processor_id,instruction_name,opcode,ready,started,finished");
   EXPECT_TRUE(getline(testfile, line_1).good());
   EXPECT_EQ(line_1,
-            "1,dummy,delay,1.1,2.2,3.3");
+            "1,dummy,delay,1.100000000000,2.200000000000,3.123456789012");
   EXPECT_TRUE(getline(testfile, line_2).good());
   EXPECT_EQ(line_2,
-            "1,dummy,delay,10.1,20.2,30.3");
+            "1,dummy,delay,10.100000000000,20.200000000000,30.123456789012");
   EXPECT_FALSE(getline(testfile, dummy).good());
 }
 
@@ -126,7 +150,7 @@ TEST(Logger, UpdateFilename) {
   auto instr_fsm = scheduler->GetFsm(instr);
   instr_fsm.SetTimeReady(1.1);
   instr_fsm.SetTimeStarted(2.2);
-  instr_fsm.SetTimeFinished(3.3);
+  instr_fsm.SetTimeFinished(3.123456789012345);
 
   std::filesystem::remove(get_testfile_name("logger_test_1.csv"));
   EXPECT_FALSE(std::filesystem::exists(get_testfile_name("logger_test_1.csv")));
@@ -144,7 +168,7 @@ TEST(Logger, UpdateFilename) {
             "processor_id,instruction_name,opcode,ready,started,finished");
   EXPECT_TRUE(getline(testfile_1, line_1).good());
   EXPECT_EQ(line_1,
-            "1,dummy,delay,1.1,2.2,3.3");
+            "1,dummy,delay,1.100000000000,2.200000000000,3.123456789012");
   EXPECT_FALSE(getline(testfile_1, dummy).good());
 
   std::filesystem::remove(get_testfile_name("logger_test_2.csv"));
@@ -153,7 +177,7 @@ TEST(Logger, UpdateFilename) {
 
   instr_fsm.SetTimeReady(10.1);
   instr_fsm.SetTimeStarted(20.2);
-  instr_fsm.SetTimeFinished(30.3);
+  instr_fsm.SetTimeFinished(30.123456789012345);
   EXPECT_OK(logger->AppendToCsv(instr_fsm));
   logger->FlushToFile();
 
@@ -165,6 +189,6 @@ TEST(Logger, UpdateFilename) {
             "processor_id,instruction_name,opcode,ready,started,finished");
   EXPECT_TRUE(getline(testfile_2, line_2).good());
   EXPECT_EQ(line_2,
-            "1,dummy,delay,10.1,20.2,30.3");
+            "1,dummy,delay,10.100000000000,20.200000000000,30.123456789012");
   EXPECT_FALSE(getline(testfile_2, dummy).good());
 }

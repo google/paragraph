@@ -1,4 +1,4 @@
-/* Copyright 2020 Google LLC
+/* Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ class Logger {
  public:
   // Logger factory that creates a Logger object given a filename with default
   // empty string. If non-empty file name is given, Logger opens file to append
-  // to it. If it fails, it return fail status.
+  // to it. If it fails, it returns fail status.
   static shim::StatusOr<std::unique_ptr<Logger>> Create(
       const std::string& filename = "");
   ~Logger() = default;
@@ -42,6 +42,10 @@ class Logger {
 
   // Set filename for the log
   absl::Status SetFilename(const std::string& filename);
+
+  // Create a single formatted CSV line for instruction FSM
+  static std::string MakeCsvLine(const InstructionFsm& fsm,
+                                 const std::string& delimiter = ",");
 
   // Write log to CSV file
   absl::Status AppendToCsv(const InstructionFsm& instruction_fsm);
