@@ -43,12 +43,17 @@ class GraphScheduler {
   // scheduled.
   // Part of Public API with simulators
   static shim::StatusOr<std::unique_ptr<GraphScheduler>> Create(
-      Graph* graph, const std::string& filename = "");
+      Graph* graph, std::unique_ptr<Logger> logger = nullptr);
 
   // Initializes graph execution and sets time when available instructions are
   // ready. Can be performed much later after scheduler creation.
   // Part of Public API with simulators
   absl::Status Initialize(double current_time);
+
+  // Checks if scheduler has logger
+  bool HasLogger();
+  // Sets logger in graph scheduler
+  void SetLogger(std::unique_ptr<Logger> logger);
 
   // Provides all instructions ready for scheduling to Simulator
   // Part of Public API with simulators

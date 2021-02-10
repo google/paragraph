@@ -25,6 +25,15 @@
 #include "paragraph/graph/graph.h"
 #include "paragraph/shim/test_macros.h"
 
+std::string testfile_name(const std::string& basename) {
+  std::string f = std::getenv("TEST_TMPDIR");
+  if (f.back() != '/') {
+    f += '/';
+  }
+  f += basename;
+  return f;
+}
+
 // Tests scheduler creation and access to instructions/subroutines FSMs
 TEST(Scheduler, Timing) {
   auto graph = absl::make_unique<paragraph::Graph>("test_graph", 1);
@@ -478,4 +487,104 @@ TEST(Scheduler, GetReadyInstructionQueue) {
   queue.pop();
   EXPECT_EQ(queue.front()->GetName(), "op2");
   queue.pop();
+}
+
+// Tests interaction with logger
+TEST(Scheduler, LoggerIO) {
+  auto graph = absl::make_unique<paragraph::Graph>("test_graph", 1);
+  auto sub = absl::make_unique<paragraph::Subroutine>(
+      "test_subroutine", graph.get());
+  auto sub_ptr = sub.get();
+  graph->SetEntrySubroutine(std::move(sub));
+  ASSERT_OK_AND_ASSIGN(auto instr, paragraph::Instruction::Create(
+      paragraph::Opcode::kDelay, "dummy", sub_ptr, true));
+
+  ASSERT_OK_AND_ASSIGN(auto scheduler,
+                       paragraph::GraphScheduler::Create(graph.get()));
+  CHECK_OK(scheduler->Initialize(0.0));
+
+  auto instr_fsm = scheduler->GetFsm(instr);
+  instr_fsm.SetTimeReady(1.1);
+  instr_fsm.SetTimeStarted(2.2);
+  instr_fsm.SetTimeFinished(3.123456789012345);
+
+  std::filesystem::remove(testfile_name("logger_test.csv"));
+  EXPECT_FALSE(std::filesystem::exists(testfile_name("logger_test.csv")));
+  ASSERT_OK_AND_ASSIGN(auto logger, paragraph::Logger::Create(
+      testfile_name("logger_test.csv")));
+  scheduler->SetLogger(std::move(logger));
+
+  scheduler->InstructionStarted(instr, 20.2);
+  scheduler->InstructionFinished(instr, 30.123456789012345);
+
+  EXPECT_TRUE(std::filesystem::exists(testfile_name("logger_test.csv")));
+  std::ifstream testfile(testfile_name("logger_test.csv"));
+  std::string header, line_1, dummy;
+
+  EXPECT_TRUE(getline(testfile, header).good());
+  EXPECT_EQ(header,
+            "processor_id,instruction_name,opcode,ready,started,finished");
+  EXPECT_TRUE(getline(testfile, line_1).good());
+  EXPECT_EQ(line_1,
+            "1,dummy,delay,0.000000000000,20.200000000000,30.123456789012");
+  EXPECT_FALSE(getline(testfile, dummy).good());
+}
+
+// Tests logger change
+TEST(GraphScheduler, LoggerChange) {
+  auto graph = absl::make_unique<paragraph::Graph>("test_graph", 1);
+  auto sub = absl::make_unique<paragraph::Subroutine>(
+      "test_subroutine", graph.get());
+  auto sub_ptr = sub.get();
+  graph->SetEntrySubroutine(std::move(sub));
+  ASSERT_OK_AND_ASSIGN(auto instr_1, paragraph::Instruction::Create(
+      paragraph::Opcode::kDelay, "dummy_1", sub_ptr, true));
+  ASSERT_OK_AND_ASSIGN(auto instr_2, paragraph::Instruction::Create(
+      paragraph::Opcode::kDelay, "dummy_2", sub_ptr, true));
+  instr_2->AddOperand(instr_1);
+
+  std::filesystem::remove(testfile_name("logger_test_1.csv"));
+  EXPECT_FALSE(std::filesystem::exists(testfile_name("logger_test_1.csv")));
+  ASSERT_OK_AND_ASSIGN(auto logger, paragraph::Logger::Create(
+      testfile_name("logger_test_1.csv")));
+
+  ASSERT_OK_AND_ASSIGN(auto scheduler,
+                       paragraph::GraphScheduler::Create(graph.get(),
+                                                         std::move(logger)));
+  CHECK_OK(scheduler->Initialize(1.1));
+
+  scheduler->InstructionStarted(instr_1, 2.2);
+  scheduler->InstructionFinished(instr_1, 3.123456789012345);
+
+  EXPECT_TRUE(std::filesystem::exists(testfile_name("logger_test_1.csv")));
+  std::ifstream testfile_1(testfile_name("logger_test_1.csv"));
+  std::string header, line_1, line_2, dummy;
+
+  EXPECT_TRUE(getline(testfile_1, header).good());
+  EXPECT_EQ(header,
+            "processor_id,instruction_name,opcode,ready,started,finished");
+  EXPECT_TRUE(getline(testfile_1, line_1).good());
+  EXPECT_EQ(line_1,
+            "1,dummy_1,delay,1.100000000000,2.200000000000,3.123456789012");
+  EXPECT_FALSE(getline(testfile_1, dummy).good());
+
+  std::filesystem::remove(testfile_name("logger_test_2.csv"));
+  EXPECT_FALSE(std::filesystem::exists(testfile_name("logger_test_2.csv")));
+  ASSERT_OK_AND_ASSIGN(auto new_logger, paragraph::Logger::Create(
+      testfile_name("logger_test_2.csv")));
+  scheduler->SetLogger(std::move(new_logger));
+
+  scheduler->InstructionStarted(instr_2, 20.2);
+  scheduler->InstructionFinished(instr_2, 30.123456789012345);
+
+  EXPECT_TRUE(std::filesystem::exists(testfile_name("logger_test_2.csv")));
+  std::ifstream testfile_2(testfile_name("logger_test_2.csv"));
+
+  EXPECT_TRUE(getline(testfile_2, header).good());
+  EXPECT_EQ(header,
+            "processor_id,instruction_name,opcode,ready,started,finished");
+  EXPECT_TRUE(getline(testfile_2, line_2).good());
+  EXPECT_EQ(line_2,
+            "1,dummy_2,delay,3.123456789012,20.200000000000,30.123456789012");
+  EXPECT_FALSE(getline(testfile_2, dummy).good());
 }
