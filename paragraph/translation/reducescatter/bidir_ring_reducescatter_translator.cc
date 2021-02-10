@@ -1,4 +1,4 @@
-/* Copyright 2020 Google LLC
+/* Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,14 +34,10 @@ BiDirRingReduceScatterTranslator::BiDirRingReduceScatterTranslator(
   }
   // Create json config for internal unidir_ring reduce-scatter
   nlohmann::json implicit_config = R"(
-    {
-      "reduce-scatter": {
-        "algorithm": "unidir-ring"
-      }
-    }
+    { "algorithm": "unidir-ring" }
   )"_json;
   auto maybe_reducescatter_translator = ReduceScatterTranslator::Create(
-                       implicit_config["reduce-scatter"]);
+                       implicit_config);
   CHECK_OK(maybe_reducescatter_translator.status());
   reducescatter_translator_ = std::move(maybe_reducescatter_translator.value());
 }

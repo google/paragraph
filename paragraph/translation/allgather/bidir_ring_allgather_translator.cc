@@ -1,4 +1,4 @@
-/* Copyright 2020 Google LLC
+/* Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,14 +33,10 @@ BiDirRingAllGatherTranslator::BiDirRingAllGatherTranslator(
   }
   // Create json config for internal unidir_ring all-gather
   nlohmann::json implicit_config = R"(
-    {
-      "all-gather": {
-        "algorithm": "unidir-ring"
-      }
-    }
+    { "algorithm": "unidir-ring" }
   )"_json;
   auto maybe_allgather_translator = AllGatherTranslator::Create(
-                       implicit_config["all-gather"]);
+                       implicit_config);
   CHECK_OK(maybe_allgather_translator.status());
   allgather_translator_ = std::move(maybe_allgather_translator.value());
 }
