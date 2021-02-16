@@ -25,16 +25,19 @@ cc_library(
     srcs = [
         "bidir_ring_reducescatter_translator.cc",
         "mesh_1d_reducescatter_translator.cc",
+        "mesh_2d_reducescatter_translator.cc",
         "unidir_ring_reducescatter_translator.cc",
     ],
     hdrs = [
         "bidir_ring_reducescatter_translator.h",
         "mesh_1d_reducescatter_translator.h",
+        "mesh_2d_reducescatter_translator.h",
         "unidir_ring_reducescatter_translator.h",
     ],
     deps = [
         ":reducescatter_interface",
         "//paragraph/translation:factory",
+        "//paragraph/translation:translation_utils",
         "//paragraph/translation/barrier:barrier",
         "//paragraph/translation/barrier:barrier_interface",
         "@libfactory//:factory",
@@ -52,6 +55,7 @@ cc_test(
     srcs = [
         "bidir_ring_reducescatter_translator_test.cc",
         "mesh_1d_reducescatter_translator_test.cc",
+        "mesh_2d_reducescatter_translator_test.cc",
         "unidir_ring_reducescatter_translator_test.cc",
     ],
     deps = [
