@@ -30,25 +30,11 @@ class Logger {
   // empty string. If non-empty file name is given, Logger opens file to append
   // to it. If it fails, it returns fail status.
   static shim::StatusOr<std::unique_ptr<Logger>> Create(
-      const std::string& filename = "");
-  ~Logger() = default;
-
-  // Flushes log to file and closes file
-  void FlushToFile();
-
-  // Checks if the logger was created with a non-empty filename and can try
-  // to store logs to CSV file
-  bool IsAvailable();
-
-  // Set filename for the log
-  absl::Status SetFilename(const std::string& filename);
-
-  // Create a single formatted CSV line for instruction FSM
-  static std::string MakeCsvLine(const InstructionFsm& fsm,
-                                 const std::string& delimiter = ",");
+      const std::string& filename);
+  ~Logger();
 
   // Write log to CSV file
-  absl::Status AppendToCsv(const InstructionFsm& instruction_fsm);
+  absl::Status AddToLog(const InstructionFsm& instruction_fsm);
 
  private:
   // Private constructor so we can handle file access errors during Logger
@@ -66,6 +52,10 @@ class Logger {
 
   // Initializes CSV file according to logger format
   absl::Status InitializeCsv();
+
+  // Create a single formatted CSV line for instruction FSM
+  static std::string MakeCsvLine(const InstructionFsm& fsm,
+                                 const std::string& delimiter = ",");
 };
 
 }  // namespace paragraph

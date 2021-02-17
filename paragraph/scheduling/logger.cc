@@ -27,6 +27,8 @@ namespace paragraph {
 
 shim::StatusOr<std::unique_ptr<Logger>> Logger::Create(
     const std::string& filename) {
+  RETURN_IF_FALSE(filename != "", absl::InvalidArgumentError) <<
+      "Logger needs a non-empty filename to create a log.";
   auto logger = absl::WrapUnique(new Logger(filename));
   if (filename != "") {
     RETURN_IF_ERROR(logger->OpenFile());
@@ -35,35 +37,14 @@ shim::StatusOr<std::unique_ptr<Logger>> Logger::Create(
   return logger;
 }
 
-void Logger::FlushToFile() {
-  if (filename_ != "") {
-    if (ostream_.is_open()) {
-      ostream_.close();
-    }
-  }
-}
-
-bool Logger::IsAvailable() {
+Logger::~Logger() {
   if (ostream_.is_open()) {
-    return true;
-  } else if (filename_ != "") {
-    return false;
-  } else if (OpenFile().ok()) {
-    return true;
-  } else {
-    return false;
+    ostream_.close();
   }
 }
 
-absl::Status Logger::SetFilename(const std::string& filename) {
-  FlushToFile();
-  filename_ = filename;
-  RETURN_IF_ERROR(OpenFile());
-  RETURN_IF_ERROR(InitializeCsv());
-  return absl::OkStatus();
-}
-
-absl::Status Logger::AppendToCsv(const InstructionFsm& instruction_fsm) {
+absl::Status Logger::AddToLog(
+    const InstructionFsm& instruction_fsm) {
   RETURN_IF_ERROR(OpenFile());
   ostream_ << MakeCsvLine(instruction_fsm) << std::endl;
   if (ostream_.fail() || ostream_.bad()) {
