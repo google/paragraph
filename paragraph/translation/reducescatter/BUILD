@@ -23,9 +23,11 @@ cc_library(
 cc_library(
     name = "reducescatter",
     srcs = [
+        "bidir_ring_reducescatter_translator.cc",
         "unidir_ring_reducescatter_translator.cc",
     ],
     hdrs = [
+        "bidir_ring_reducescatter_translator.h",
         "unidir_ring_reducescatter_translator.h",
     ],
     deps = [
@@ -46,6 +48,7 @@ cc_test(
     name = "reducescatter_test",
     size = "small",
     srcs = [
+        "bidir_ring_reducescatter_translator_test.cc",
         "unidir_ring_reducescatter_translator_test.cc",
     ],
     deps = [
