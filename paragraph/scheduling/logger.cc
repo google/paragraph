@@ -38,16 +38,16 @@ shim::StatusOr<std::unique_ptr<Logger>> Logger::Create(
 }
 
 Logger::~Logger() {
-  if (ostream_.is_open()) {
-    ostream_.close();
+  if (log_stream_.is_open()) {
+    log_stream_.close();
   }
 }
 
 absl::Status Logger::LogInstruction(
     const InstructionFsm& instruction_fsm) {
   RETURN_IF_ERROR(OpenFile());
-  ostream_ << MakeCsvLine(instruction_fsm) << std::endl;
-  if (ostream_.fail() || ostream_.bad()) {
+  log_stream_ << MakeCsvLine(instruction_fsm) << std::endl;
+  if (log_stream_.fail() || log_stream_.bad()) {
     return absl::InternalError(
         "Failed to write trace to CSV file: " + filename_);
   }
@@ -56,26 +56,27 @@ absl::Status Logger::LogInstruction(
 
 Logger::Logger(const std::string& filename)
     : filename_(filename) {
-  std::fstream ostream_;
+  std::fstream log_stream_;
 }
 
 absl::Status Logger::OpenFile() {
-  if (!ostream_.is_open()) {
+  if (!log_stream_.is_open()) {
     if (filename_ == "") {
       return absl::InvalidArgumentError(
           "File '" + filename_ + "' could not be opened.");
     }
-    ostream_.open(filename_, std::ios::out | std::ios::trunc);
-    RETURN_IF_FALSE(ostream_.is_open(), absl::InternalError) <<
+    log_stream_.open(filename_, std::ios::out | std::ios::trunc);
+    RETURN_IF_FALSE(log_stream_.is_open(), absl::InternalError) <<
         "File '" << filename_ << "' could not be opened.";
   }
   return absl::OkStatus();
 }
 
 absl::Status Logger::InitializeCsv() {
-  if (ostream_.is_open()) {
-    ostream_ << "processor_id,instruction_name,opcode,ready,started,finished";
-    ostream_ << std::endl;
+  if (log_stream_.is_open()) {
+    log_stream_ <<
+        "processor_id,instruction_name,opcode,ready,started,finished";
+    log_stream_ << std::endl;
   } else {
     return absl::InternalError("Can't initialize CSV File '" + filename_ +
                                "': file could not be opened.");

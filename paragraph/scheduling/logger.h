@@ -44,8 +44,8 @@ class Logger {
   // Name of the CSV file to append log to
   std::string filename_;
 
-  // Filestream for the CSV log
-  std::fstream ostream_;
+  // output filestream for the log
+  std::ofstream log_stream_;
 
   // Checks if Logger file is open and if not tries to open it
   absl::Status OpenFile();
