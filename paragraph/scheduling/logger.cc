@@ -43,7 +43,7 @@ Logger::~Logger() {
   }
 }
 
-absl::Status Logger::AddToLog(
+absl::Status Logger::LogInstruction(
     const InstructionFsm& instruction_fsm) {
   RETURN_IF_ERROR(OpenFile());
   ostream_ << MakeCsvLine(instruction_fsm) << std::endl;

@@ -34,7 +34,7 @@ class Logger {
   ~Logger();
 
   // Write log to CSV file
-  absl::Status AddToLog(const InstructionFsm& instruction_fsm);
+  absl::Status LogInstruction(const InstructionFsm& instruction_fsm);
 
  private:
   // Private constructor so we can handle file access errors during Logger

@@ -71,12 +71,12 @@ TEST(Logger, FileIO) {
   EXPECT_FALSE(std::filesystem::exists(get_testfile_name("logger_test.csv")));
   ASSERT_OK_AND_ASSIGN(auto logger, paragraph::Logger::Create(
       get_testfile_name("logger_test.csv")));
-  EXPECT_OK(logger->AddToLog(instr_fsm));
+  EXPECT_OK(logger->LogInstruction(instr_fsm));
 
   instr_fsm.SetTimeReady(10.1);
   instr_fsm.SetTimeStarted(20.2);
   instr_fsm.SetTimeFinished(30.123456789012345);
-  EXPECT_OK(logger->AddToLog(instr_fsm));
+  EXPECT_OK(logger->LogInstruction(instr_fsm));
 
   EXPECT_TRUE(std::filesystem::exists(get_testfile_name("logger_test.csv")));
   std::ifstream testfile(get_testfile_name("logger_test.csv"));

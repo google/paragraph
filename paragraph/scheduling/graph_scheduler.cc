@@ -96,7 +96,7 @@ void GraphScheduler::InstructionFinished(
     }
   }
   if (HasLogger()) {
-    CHECK_OK(logger_->AddToLog(GetFsm(instruction)));
+    CHECK_OK(logger_->LogInstruction(GetFsm(instruction)));
   }
 }
 
