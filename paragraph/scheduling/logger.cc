@@ -55,9 +55,7 @@ absl::Status Logger::LogInstruction(
 }
 
 Logger::Logger(const std::string& filename)
-    : filename_(filename) {
-  std::fstream log_stream_;
-}
+    : filename_(filename) {}
 
 absl::Status Logger::OpenFile() {
   if (!log_stream_.is_open()) {
