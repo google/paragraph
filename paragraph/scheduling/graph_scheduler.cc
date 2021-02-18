@@ -18,14 +18,19 @@ namespace paragraph {
 
 GraphScheduler::GraphScheduler(Graph* graph)
     : graph_(graph),
-      current_time_(0.0) {}
+      current_time_(0.0) {
+  logger_ = nullptr;
+}
 
 shim::StatusOr<std::unique_ptr<GraphScheduler>> GraphScheduler::Create(
-    Graph* graph) {
+    Graph* graph, std::unique_ptr<Logger> logger) {
   // Check that graph is valid and can be scheduled
   RETURN_IF_ERROR(graph->ValidateIndividualized());
   // Using `new` and WrapUnique to access a non-public constructor.
   auto scheduler = absl::WrapUnique(new GraphScheduler(graph));
+  if (logger != nullptr) {
+    scheduler->logger_ = std::move(logger);
+  }
 
   // Create all FSMs for instructions and subroutines
   for (const auto& subroutine : scheduler->graph_->Subroutines()) {
@@ -63,6 +68,14 @@ absl::Status GraphScheduler::Initialize(double current_time) {
   return absl::OkStatus();
 }
 
+bool GraphScheduler::HasLogger() {
+  return logger_ != nullptr;
+}
+
+void GraphScheduler::SetLogger(std::unique_ptr<Logger> logger) {
+  logger_ = std::move(logger);
+}
+
 void GraphScheduler::InstructionStarted(
     Instruction* instruction, double current_time) {
   CHECK_LE(current_time_, current_time);
@@ -81,6 +94,9 @@ void GraphScheduler::InstructionFinished(
     if (GetFsm(user).IsUnblockedByOperands()) {
       CHECK_OK(GetFsm(user).PrepareToSchedule());
     }
+  }
+  if (HasLogger()) {
+    CHECK_OK(logger_->LogInstruction(GetFsm(instruction)));
   }
 }
 

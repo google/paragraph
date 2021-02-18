@@ -25,6 +25,7 @@
 #include "absl/container/flat_hash_map.h"
 #include "paragraph/graph/graph.h"
 #include "paragraph/scheduling/instruction_fsm.h"
+#include "paragraph/scheduling/logger.h"
 #include "paragraph/scheduling/subroutine_fsm.h"
 #include "paragraph/shim/macros.h"
 #include "paragraph/shim/statusor.h"
@@ -42,12 +43,17 @@ class GraphScheduler {
   // scheduled.
   // Part of Public API with simulators
   static shim::StatusOr<std::unique_ptr<GraphScheduler>> Create(
-      Graph* graph);
+      Graph* graph, std::unique_ptr<Logger> logger = nullptr);
 
   // Initializes graph execution and sets time when available instructions are
   // ready. Can be performed much later after scheduler creation.
   // Part of Public API with simulators
   absl::Status Initialize(double current_time);
+
+  // Checks if scheduler has logger
+  bool HasLogger();
+  // Sets logger in graph scheduler
+  void SetLogger(std::unique_ptr<Logger> logger);
 
   // Provides all instructions ready for scheduling to Simulator
   // Part of Public API with simulators
@@ -87,6 +93,10 @@ class GraphScheduler {
   // Current simulation time set and updated by simulator every time when public
   // API is used.
   double current_time_;
+
+  // Logger that collects all the information about the instruction timings
+  // during the graph execution
+  std::unique_ptr<Logger> logger_;
 
   // Scheduler instruction queue
   std::vector<Instruction*> ready_to_schedule_;

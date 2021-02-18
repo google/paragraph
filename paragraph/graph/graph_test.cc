@@ -808,12 +808,12 @@ TEST(Graph, Clone) {
   EXPECT_EQ(graph_new->SubroutineCount(), 4);
 }
 
-std::string get_testfile_name(const std::string& _basename) {
+std::string get_testfile_name(const std::string& basename) {
   std::string f = std::getenv("TEST_TMPDIR");
   if (f.back() != '/') {
     f += '/';
   }
-  f += _basename;
+  f += basename;
   return f;
 }
 

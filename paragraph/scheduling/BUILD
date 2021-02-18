@@ -5,11 +5,13 @@ cc_library(
     srcs = [
         "graph_scheduler.cc",
         "instruction_fsm.cc",
+        "logger.cc",
         "subroutine_fsm.cc",
     ],
     hdrs = [
         "graph_scheduler.h",
         "instruction_fsm.h",
+        "logger.h",
         "subroutine_fsm.h",
     ],
     deps = [
@@ -31,6 +33,7 @@ cc_test(
     srcs = [
         "graph_scheduler_test.cc",
         "instruction_fsm_test.cc",
+        "logger_test.cc",
         "subroutine_fsm_test.cc",
     ],
     deps = [

@@ -14,9 +14,12 @@
  */
 #include "paragraph/scheduling/instruction_fsm.h"
 
+#include <string>
 #include <vector>
 
+#include "absl/strings/str_cat.h"
 #include "paragraph/scheduling/graph_scheduler.h"
+#include "paragraph/shim/macros.h"
 
 namespace paragraph {
 
@@ -128,6 +131,10 @@ void InstructionFsm::Reset() {
   for (auto& subroutine : instruction_->InnerSubroutines()) {
     scheduler_->GetFsm(subroutine.get()).Reset();
   }
+}
+
+const Instruction* InstructionFsm::GetInstruction() const {
+  return instruction_;
 }
 
 absl::Status InstructionFsm::PrepareToSchedule() {
