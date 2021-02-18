@@ -24,10 +24,12 @@ cc_library(
     name = "allgather",
     srcs = [
         "bidir_ring_allgather_translator.cc",
+        "mesh_1d_allgather_translator.cc",
         "unidir_ring_allgather_translator.cc",
     ],
     hdrs = [
         "bidir_ring_allgather_translator.h",
+        "mesh_1d_allgather_translator.h",
         "unidir_ring_allgather_translator.h",
     ],
     deps = [
@@ -49,6 +51,7 @@ cc_test(
     size = "small",
     srcs = [
         "bidir_ring_allgather_translator_test.cc",
+        "mesh_1d_allgather_translator_test.cc",
         "unidir_ring_allgather_translator_test.cc",
     ],
     deps = [
