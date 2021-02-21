@@ -27,6 +27,7 @@ cc_library(
         "mesh_1d_reducescatter_translator.cc",
         "mesh_2d_reducescatter_translator.cc",
         "torus_2d_reducescatter_translator.cc",
+        "mesh_2d_ring_reducescatter_translator.cc",
         "unidir_ring_reducescatter_translator.cc",
     ],
     hdrs = [
@@ -34,6 +35,7 @@ cc_library(
         "mesh_1d_reducescatter_translator.h",
         "mesh_2d_reducescatter_translator.h",
         "torus_2d_reducescatter_translator.h",
+        "mesh_2d_ring_reducescatter_translator.h",
         "unidir_ring_reducescatter_translator.h",
     ],
     deps = [
@@ -59,6 +61,7 @@ cc_test(
         "mesh_1d_reducescatter_translator_test.cc",
         "mesh_2d_reducescatter_translator_test.cc",
         "torus_2d_reducescatter_translator_test.cc",
+        "mesh_2d_ring_reducescatter_translator_test.cc",
         "unidir_ring_reducescatter_translator_test.cc",
     ],
     deps = [
