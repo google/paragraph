@@ -18,7 +18,7 @@
 
 namespace paragraph {
 
-std::vector<uint64_t> ConsecutiveProcessorIdToMeshCoordinates(
+std::vector<uint64_t> ConsecutiveProcessorIdToGridCoordinates(
     int64_t processor_id,
     const std::vector<uint64_t>& dimension_sizes,
     uint64_t concentration) {
@@ -32,7 +32,7 @@ std::vector<uint64_t> ConsecutiveProcessorIdToMeshCoordinates(
   return coordinates;
 }
 
-uint64_t MeshCoordinatesToConsecutiveProcessorId(
+uint64_t GridCoordinatesToConsecutiveProcessorId(
     const std::vector<uint64_t>& coordinates,
     const std::vector<uint64_t>& dimension_sizes,
     uint64_t concentration) {
@@ -45,7 +45,7 @@ uint64_t MeshCoordinatesToConsecutiveProcessorId(
   return processor_id;
 }
 
-CommunicationGroup Swizzling2dMeshToRing(
+CommunicationGroup Swizzling2dGridToRing(
     const std::vector<uint64_t>& dimension_sizes,
     uint64_t concentration) {
   CHECK_EQ(dimension_sizes.size(), 2) << "Algorithm expects 2D Mesh or Torus.";
@@ -56,21 +56,21 @@ CommunicationGroup Swizzling2dMeshToRing(
   CommunicationGroup swizzled_ring;
   for (uint64_t conc = 0; conc < concentration; conc++) {
     swizzled_ring.push_back(
-        MeshCoordinatesToConsecutiveProcessorId({conc, 0, 0},
+        GridCoordinatesToConsecutiveProcessorId({conc, 0, 0},
                                                 dimension_sizes,
                                                 concentration));
   }
   // Iterate over all columns; and all rows from the 1st to the last
   for (uint64_t col = 0; col < dimension_sizes.at(0); col++) {
-    for (uint64_t j = 1; j < dimension_sizes.at(1); j++) {
+    for (uint64_t row_iter = 1; row_iter < dimension_sizes.at(1); row_iter++) {
       // Change swizzling direction depending on column parity
       // For column 0 and even columns, go down;
       // For the last column and odd columns, go up.
-      uint64_t row = (col % 2) ? dimension_sizes.at(1) - j : j;
+      uint64_t row = (col % 2) ? dimension_sizes.at(1) - row_iter : row_iter;
       // Add all concentrators
       for (uint64_t conc = 0; conc < concentration; conc++) {
         swizzled_ring.push_back(
-            MeshCoordinatesToConsecutiveProcessorId({conc, col, row},
+            GridCoordinatesToConsecutiveProcessorId({conc, col, row},
                                                     dimension_sizes,
                                                     concentration));
       }
@@ -81,7 +81,7 @@ CommunicationGroup Swizzling2dMeshToRing(
   for (uint64_t col = dimension_sizes.at(0) - 1; col > 0; col--) {
     for (uint64_t conc = 0; conc < concentration; conc++) {
       swizzled_ring.push_back(
-          MeshCoordinatesToConsecutiveProcessorId({conc, col, 0},
+          GridCoordinatesToConsecutiveProcessorId({conc, col, 0},
                                                   dimension_sizes,
                                                   concentration));
     }

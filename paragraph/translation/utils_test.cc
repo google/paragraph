@@ -18,43 +18,43 @@
 #include "paragraph/graph/graph.h"
 #include "paragraph/shim/test_macros.h"
 
-// Tests conversion between consecutive processor id and 2d mesh coordinates
-TEST(TranslationUtils, ConsecutiveProcessorIdToMeshCoordinates) {
+// Tests conversion between consecutive processor id and 2d grid coordinates
+TEST(TranslationUtils, ConsecutiveProcessorIdToGridCoordinates) {
   uint64_t concentration = 2;
   std::vector<uint64_t> dimension_sizes = {4, 3};
   std::vector<uint64_t> target_coord_1 = {1, 0, 0};
-  EXPECT_EQ(paragraph::ConsecutiveProcessorIdToMeshCoordinates(
+  EXPECT_EQ(paragraph::ConsecutiveProcessorIdToGridCoordinates(
       1, dimension_sizes, concentration),
             target_coord_1);
 
   std::vector<uint64_t> target_coord_2 = {0, 1, 1};
-  EXPECT_EQ(paragraph::ConsecutiveProcessorIdToMeshCoordinates(
+  EXPECT_EQ(paragraph::ConsecutiveProcessorIdToGridCoordinates(
       10, dimension_sizes, concentration),
             target_coord_2);
 
   std::vector<uint64_t> target_coord_3 = {0, 3, 2};
-  EXPECT_EQ(paragraph::ConsecutiveProcessorIdToMeshCoordinates(
+  EXPECT_EQ(paragraph::ConsecutiveProcessorIdToGridCoordinates(
       22, dimension_sizes, concentration),
             target_coord_3);
 }
 
-// Tests conversion between 2d mesh coordinates and consecutive processor id
-TEST(TranslationUtils, MeshCoordinatesToConsecutiveProcessorId) {
+// Tests conversion between 2d grid coordinates and consecutive processor id
+TEST(TranslationUtils, GridCoordinatesToConsecutiveProcessorId) {
   uint64_t concentration = 2;
   std::vector<uint64_t> dimension_sizes = {4, 3};
-  EXPECT_EQ(paragraph::MeshCoordinatesToConsecutiveProcessorId(
+  EXPECT_EQ(paragraph::GridCoordinatesToConsecutiveProcessorId(
       {1, 0, 0}, dimension_sizes, concentration),
             1);
-  EXPECT_EQ(paragraph::MeshCoordinatesToConsecutiveProcessorId(
+  EXPECT_EQ(paragraph::GridCoordinatesToConsecutiveProcessorId(
       {0, 1, 1}, dimension_sizes, concentration),
             10);
-  EXPECT_EQ(paragraph::MeshCoordinatesToConsecutiveProcessorId(
+  EXPECT_EQ(paragraph::GridCoordinatesToConsecutiveProcessorId(
       {0, 3, 2}, dimension_sizes, concentration),
             22);
 }
 
-// Tests 2d swizzling to map 2D Mesh/Torus on a logical ring
-TEST(TranslationUtils, Swizzling2dMeshToRing) {
+// Tests 2d swizzling to map 2D grid on a logical ring
+TEST(TranslationUtils, Swizzling2dGridToRing) {
   uint64_t concentration = 2;
   std::vector<uint64_t> dimension_sizes = {4, 3};
 
@@ -63,9 +63,9 @@ TEST(TranslationUtils, Swizzling2dMeshToRing) {
                                                   12, 13, 20, 21,
                                                   22, 23, 14, 15,
                                                   6, 7, 4, 5, 2, 3};
-  EXPECT_EQ(paragraph::Swizzling2dMeshToRing(dimension_sizes, concentration),
+  EXPECT_EQ(paragraph::Swizzling2dGridToRing(dimension_sizes, concentration),
             target_group_1);
 
   paragraph::CommunicationGroup target_group_2 = {0, 2, 3, 1};
-  EXPECT_EQ(paragraph::Swizzling2dMeshToRing({2, 2}, 1), target_group_2);
+  EXPECT_EQ(paragraph::Swizzling2dGridToRing({2, 2}, 1), target_group_2);
 }
