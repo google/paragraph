@@ -97,7 +97,7 @@ absl::Status SubroutineFsm::InstructionFinished(
       << instruction->GetName() << " in subroutine " << subroutine_->GetName()
       << " scheduler.";
   if (instructions_to_execute_.empty()) {
-    current_execution_count_--;
+    DecrementExecutionCount();
     SetFinished();
     RETURN_IF_FALSE(subroutine_->GetCallingInstruction() != nullptr,
                     absl::InternalError) << "Subroutine " <<

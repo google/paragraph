@@ -80,6 +80,18 @@ void GraphScheduler::InstructionStarted(
     Instruction* instruction, double current_time) {
   CHECK_LE(current_time_, current_time);
   current_time_ = current_time;
+  // Check if instruction that calls this instruction's parent subroutine was
+  // not marked as started yet, and if so mark it started from the first
+  // nested instruction of their inner subroutine(s).
+  if (instruction->GetParent() !=
+      instruction->GetGraph()->GetEntrySubroutine()) {
+    if (GetFsm(
+        instruction->GetParent()->GetCallingInstruction()).GetTimeStarted()
+        == 0) {
+      GetFsm(instruction->GetParent()->GetCallingInstruction()).SetTimeStarted(
+          current_time);
+    }
+  }
   GetFsm(instruction).SetTimeStarted(current_time);
 }
 
@@ -89,14 +101,14 @@ void GraphScheduler::InstructionFinished(
   current_time_ = current_time;
   GetFsm(instruction).SetFinished();
   GetFsm(instruction).SetTimeFinished(current_time);
+  if (HasLogger()) {
+    CHECK_OK(logger_->LogInstruction(GetFsm(instruction)));
+  }
   CHECK_OK(GetFsm(instruction->GetParent()).InstructionFinished(instruction));
   for (auto& user : instruction->Users()) {
     if (GetFsm(user).IsUnblockedByOperands()) {
       CHECK_OK(GetFsm(user).PrepareToSchedule());
     }
-  }
-  if (HasLogger()) {
-    CHECK_OK(logger_->LogInstruction(GetFsm(instruction)));
   }
 }
 
