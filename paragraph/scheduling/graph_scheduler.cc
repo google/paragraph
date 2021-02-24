@@ -14,6 +14,8 @@
  */
 #include "paragraph/scheduling/graph_scheduler.h"
 
+#include <algorithm>
+
 namespace paragraph {
 
 GraphScheduler::GraphScheduler(Graph* graph)
@@ -80,19 +82,8 @@ void GraphScheduler::InstructionStarted(
     Instruction* instruction, double current_time) {
   CHECK_LE(current_time_, current_time);
   current_time_ = current_time;
-  // Check if instruction that calls this instruction's parent subroutine was
-  // not marked as started yet, and if so mark it started from the first
-  // nested instruction of their inner subroutine(s).
-  if (instruction->GetParent() !=
-      instruction->GetGraph()->GetEntrySubroutine()) {
-    if (GetFsm(
-        instruction->GetParent()->GetCallingInstruction()).GetTimeStarted()
-        == 0) {
-      GetFsm(instruction->GetParent()->GetCallingInstruction()).SetTimeStarted(
-          current_time);
-    }
-  }
   GetFsm(instruction).SetTimeStarted(current_time);
+  GetFsm(instruction).SetExecuting();
 }
 
 void GraphScheduler::InstructionFinished(
@@ -101,9 +92,26 @@ void GraphScheduler::InstructionFinished(
   current_time_ = current_time;
   GetFsm(instruction).SetFinished();
   GetFsm(instruction).SetTimeFinished(current_time);
+  // When we finish instruction that has inner subroutines, we need to find
+  // when the first instruction in inner subroutines has started. That marks the
+  // start time of this instruction as its exection happens in scheduler, not in
+  // simulator, and stays in Scheduled stage
+  if (instruction->InnerSubroutines().size() > 0) {
+    double start_time = current_time;
+    for (auto& subroutine : instruction->InnerSubroutines()) {
+      for (auto& nested_instr : subroutine->Instructions()) {
+        start_time = std::min(start_time,
+                              GetFsm(nested_instr.get()).GetTimeStarted());
+      }
+    }
+    GetFsm(instruction).SetTimeStarted(start_time);
+  }
+  // Log instruction
   if (HasLogger()) {
     CHECK_OK(logger_->LogInstruction(GetFsm(instruction)));
   }
+  // Unblock all the users of this instruction if they don't have any other
+  // dependencies
   CHECK_OK(GetFsm(instruction->GetParent()).InstructionFinished(instruction));
   for (auto& user : instruction->Users()) {
     if (GetFsm(user).IsUnblockedByOperands()) {

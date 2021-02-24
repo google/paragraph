@@ -150,7 +150,7 @@ absl::Status InstructionFsm::PrepareToSchedule() {
         seen = true;
       }
     }
-    if (!seen) {
+    if (!seen & !IsScheduled()) {
       SetTimeReady(scheduler_->GetCurrentTime());
     }
     SetScheduled();
