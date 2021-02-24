@@ -60,7 +60,8 @@ InstructionFsm::InstructionFsm(GraphScheduler* scheduler,
       scheduler_(scheduler),
       time_ready_(0.0),
       time_started_(0.0),
-      time_finished_(0.0) {}
+      time_finished_(0.0),
+      execution_time_(0.0) {}
 
 bool InstructionFsm::IsUnblockedByOperands() const {
   bool unblocked = true;
@@ -122,6 +123,14 @@ void InstructionFsm::SetTimeFinished(double current_time) {
   time_finished_ = current_time;
 }
 
+double InstructionFsm::GetExecutionTime() const {
+  return execution_time_;
+}
+
+void InstructionFsm::SetExecutionTime(double current_time) {
+  execution_time_ = current_time;
+}
+
 void InstructionFsm::Reset() {
   if (instruction_->Operands().empty()) {
     state_ = State::kReady;
@@ -139,10 +148,10 @@ const Instruction* InstructionFsm::GetInstruction() const {
 
 absl::Status InstructionFsm::PrepareToSchedule() {
   // If instruction has inner subroutines, we don't schedule it directly,
-  // instead we schedule inner subroutines and its instructionss
+  // instead we schedule inner subroutines and its instructions
   if (!instruction_->InnerSubroutines().empty()) {
     // If we see instruction with its subroutines for the first time, set ready
-    // and started time immediately
+    // time immediately
     bool seen = false;
     for (auto& subroutine : instruction_->InnerSubroutines()) {
       if (subroutine->GetExecutionCount() !=

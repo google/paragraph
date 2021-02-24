@@ -72,8 +72,8 @@ absl::Status Logger::OpenFile() {
 
 absl::Status Logger::InitializeCsv() {
   if (log_stream_.is_open()) {
-    log_stream_ <<
-        "processor_id,instruction_name,opcode,ready,started,finished";
+    log_stream_ << "processor_id,instruction_name,opcode,ready,"
+                << "started,finished,execution";
     log_stream_ << std::endl;
   } else {
     return absl::InternalError("Can't initialize CSV File '" + filename_ +
@@ -97,13 +97,17 @@ std::string Logger::MakeCsvLine(const InstructionFsm& fsm,
   str_stream.str("");
   str_stream << fsm.GetTimeFinished();
   std::string time_finished_str = str_stream.str();
+  str_stream.str("");
+  str_stream << fsm.GetExecutionTime();
+  std::string execution_time_str = str_stream.str();
   std::string log_entry_str = absl::StrCat(
       fsm.GetInstruction()->GetGraph()->GetProcessorId(), delimiter,
       fsm.GetInstruction()->GetName(), delimiter,
       OpcodeToString(fsm.GetInstruction()->GetOpcode()), delimiter,
       time_ready_str, delimiter,
       time_started_str, delimiter,
-      time_finished_str);
+      time_finished_str, delimiter,
+      execution_time_str);
   return log_entry_str;
 }
 
