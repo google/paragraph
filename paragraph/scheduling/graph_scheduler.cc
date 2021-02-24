@@ -101,10 +101,10 @@ void GraphScheduler::InstructionFinished(
   }
   // When we finish instruction that has inner subroutines, we need to find
   // when the first instruction in inner subroutines has started. That marks the
-  // start time of this instruction as its exection happens in scheduler, not in
-  // simulator, and stays in Scheduled stage
-  // Also updates instrction execution time to be a sum of nedted instructions
-  // execution time
+  // start time of this instruction as its execution happens in scheduler, not in
+  // simulator, and stays in Scheduled state.
+  // Also updates instruction execution time to be a sum of nested instructions
+  // execution time.
   if (instruction->InnerSubroutines().size() > 0) {
     double start_time = current_time;
     for (auto& subroutine : instruction->InnerSubroutines()) {

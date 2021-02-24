@@ -148,10 +148,10 @@ const Instruction* InstructionFsm::GetInstruction() const {
 
 absl::Status InstructionFsm::PrepareToSchedule() {
   // If instruction has inner subroutines, we don't schedule it directly,
-  // instead we schedule inner subroutines and its instructionss
+  // instead we schedule inner subroutines and its instructions
   if (!instruction_->InnerSubroutines().empty()) {
     // If we see instruction with its subroutines for the first time, set ready
-    // and started time immediately
+    // time immediately
     bool seen = false;
     for (auto& subroutine : instruction_->InnerSubroutines()) {
       if (subroutine->GetExecutionCount() !=
