@@ -111,6 +111,37 @@ cc_test(
     ],
 )
 
+cc_library(
+    name = "translation_utils",
+    srcs = [
+        "utils.cc",
+    ],
+    hdrs = [
+        "utils.h",
+    ],
+    deps = [
+        "//paragraph/graph:graph",
+    ],
+    visibility = [
+        "//visibility:public",
+    ],
+    alwayslink = 1,
+)
+
+cc_test(
+    name = "translation_utils_test",
+    size = "small",
+    srcs = [
+        "utils_test.cc"
+    ],
+    deps = [
+        ":translation_utils",
+        "//paragraph/graph:graph",
+        "//paragraph/shim:test_macros",
+        "@googletest//:gtest_main",
+    ],
+)
+
 genrule(
     name = "lint_cc",
     srcs = glob([
