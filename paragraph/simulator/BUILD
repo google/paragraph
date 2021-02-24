@@ -12,7 +12,6 @@ cc_library(
         "//paragraph/graph:graph",
         "//paragraph/shim:statusor",
         "//paragraph/scheduling:scheduler",
-        "@com_google_protobuf//:protobuf",
         "@com_google_absl//absl/memory:memory",
         "@com_google_absl//absl/strings:strings",
     ],
@@ -21,6 +20,25 @@ cc_library(
     ],
 )
 
+cc_binary(
+    name = "simulator",
+    srcs = [
+        "simulator.cc",
+    ],
+    deps = [
+        ":simple_sim",
+        "//paragraph/graph:graph",
+        "//paragraph/shim:statusor",
+        "//paragraph/scheduling:scheduler",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/memory:memory",
+        "@com_google_absl//absl/strings:strings",
+    ],
+    visibility = [
+        "//visibility:public",
+    ],
+)
 cc_test(
     name = "simple_sim_test",
     size = "small",
