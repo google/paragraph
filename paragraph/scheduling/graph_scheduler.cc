@@ -18,7 +18,8 @@ namespace paragraph {
 
 GraphScheduler::GraphScheduler(Graph* graph)
     : graph_(graph),
-      current_time_(0.0) {
+      current_time_(0.0),
+      initialized_(false) {
   logger_ = nullptr;
 }
 
@@ -59,6 +60,7 @@ shim::StatusOr<std::unique_ptr<GraphScheduler>> GraphScheduler::Create(
 absl::Status GraphScheduler::Initialize(double current_time) {
   CHECK_LE(current_time_, current_time);
   current_time_ = current_time;
+  initialized_ = true;
   // Reset all FSMs recursively starting from entry subroutine
   GetFsm(graph_->GetEntrySubroutine()).Reset();
   // Moves available to be scheduled instructions from entry subroutine to the
@@ -78,6 +80,7 @@ void GraphScheduler::SetLogger(std::unique_ptr<Logger> logger) {
 
 void GraphScheduler::InstructionStarted(
     Instruction* instruction, double current_time) {
+  CHECK(initialized_);
   CHECK_LE(current_time_, current_time);
   current_time_ = current_time;
   GetFsm(instruction).SetTimeStarted(current_time);
@@ -101,10 +104,12 @@ void GraphScheduler::InstructionFinished(
 }
 
 void GraphScheduler::EnqueueToScheduler(Instruction* instruction) {
+  CHECK(initialized_);
   ready_to_schedule_.push_back(instruction);
 }
 
 std::vector<Instruction*> GraphScheduler::GetReadyInstructions() {
+  CHECK(initialized_);
   std::vector<Instruction *> rtn;
   for (auto& instruction : ready_to_schedule_) {
     GetFsm(instruction).SetScheduled();
@@ -115,6 +120,7 @@ std::vector<Instruction*> GraphScheduler::GetReadyInstructions() {
 }
 
 void GraphScheduler::GetReadyInstructions(std::queue<Instruction*>& queue) {
+  CHECK(initialized_);
   for (auto& instruction : ready_to_schedule_) {
     GetFsm(instruction).SetScheduled();
     queue.push(instruction);

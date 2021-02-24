@@ -94,6 +94,9 @@ class GraphScheduler {
   // API is used.
   double current_time_;
 
+  // Flag that checks if scheduler was initialized with start time
+  bool initialized_;
+
   // Logger that collects all the information about the instruction timings
   // during the graph execution
   std::unique_ptr<Logger> logger_;
