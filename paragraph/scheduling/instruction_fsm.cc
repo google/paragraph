@@ -60,7 +60,8 @@ InstructionFsm::InstructionFsm(GraphScheduler* scheduler,
       scheduler_(scheduler),
       time_ready_(0.0),
       time_started_(0.0),
-      time_finished_(0.0) {}
+      time_finished_(0.0),
+      execution_time_(0.0) {}
 
 bool InstructionFsm::IsUnblockedByOperands() const {
   bool unblocked = true;
@@ -120,6 +121,14 @@ double InstructionFsm::GetTimeFinished() const {
 
 void InstructionFsm::SetTimeFinished(double current_time) {
   time_finished_ = current_time;
+}
+
+double InstructionFsm::GetExecutionTime() const {
+  return execution_time_;
+}
+
+void InstructionFsm::SetExecutionTime(double current_time) {
+  execution_time_ = current_time;
 }
 
 void InstructionFsm::Reset() {

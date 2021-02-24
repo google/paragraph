@@ -45,7 +45,8 @@ TEST(Logger, Create) {
   std::string header;
   EXPECT_TRUE(getline(testfile, header).good());
   EXPECT_EQ(header,
-            "processor_id,instruction_name,opcode,ready,started,finished");
+            "processor_id,instruction_name,opcode,ready,"
+            "started,finished,execution");
 }
 
 // Tests graph writing to and reading from file
@@ -66,6 +67,7 @@ TEST(Logger, FileIO) {
   instr_fsm.SetTimeReady(1.1);
   instr_fsm.SetTimeStarted(2.2);
   instr_fsm.SetTimeFinished(3.123456789012345);
+  instr_fsm.SetExecutionTime(0.923456789012345);
 
   std::filesystem::remove(get_testfile_name("logger_test.csv"));
   EXPECT_FALSE(std::filesystem::exists(get_testfile_name("logger_test.csv")));
@@ -76,6 +78,7 @@ TEST(Logger, FileIO) {
   instr_fsm.SetTimeReady(10.1);
   instr_fsm.SetTimeStarted(20.2);
   instr_fsm.SetTimeFinished(30.123456789012345);
+  instr_fsm.SetExecutionTime(9.923456789012345);
   EXPECT_OK(logger->LogInstruction(instr_fsm));
 
   EXPECT_TRUE(std::filesystem::exists(get_testfile_name("logger_test.csv")));
@@ -84,12 +87,15 @@ TEST(Logger, FileIO) {
 
   EXPECT_TRUE(getline(testfile, header).good());
   EXPECT_EQ(header,
-            "processor_id,instruction_name,opcode,ready,started,finished");
+            "processor_id,instruction_name,opcode,"
+            "ready,started,finished,execution");
   EXPECT_TRUE(getline(testfile, line_1).good());
   EXPECT_EQ(line_1,
-            "1,dummy,delay,1.100000000000,2.200000000000,3.123456789012");
+            "1,dummy,delay,1.100000000000,2.200000000000,"
+            "3.123456789012,0.923456789012");
   EXPECT_TRUE(getline(testfile, line_2).good());
   EXPECT_EQ(line_2,
-            "1,dummy,delay,10.100000000000,20.200000000000,30.123456789012");
+            "1,dummy,delay,10.100000000000,20.200000000000,"
+            "30.123456789012,9.923456789012");
   EXPECT_FALSE(getline(testfile, dummy).good());
 }

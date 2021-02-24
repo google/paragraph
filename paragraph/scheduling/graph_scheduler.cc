@@ -95,16 +95,25 @@ void GraphScheduler::InstructionFinished(
   current_time_ = current_time;
   GetFsm(instruction).SetFinished();
   GetFsm(instruction).SetTimeFinished(current_time);
+  if (instruction->InnerSubroutines().empty()) {
+    GetFsm(instruction).SetExecutionTime(current_time -
+                                         GetFsm(instruction).GetTimeStarted());
+  }
   // When we finish instruction that has inner subroutines, we need to find
   // when the first instruction in inner subroutines has started. That marks the
   // start time of this instruction as its exection happens in scheduler, not in
   // simulator, and stays in Scheduled stage
+  // Also updates instrction execution time to be a sum of nedted instructions
+  // execution time
   if (instruction->InnerSubroutines().size() > 0) {
     double start_time = current_time;
     for (auto& subroutine : instruction->InnerSubroutines()) {
       for (auto& nested_instr : subroutine->Instructions()) {
         start_time = std::min(start_time,
                               GetFsm(nested_instr.get()).GetTimeStarted());
+        GetFsm(instruction).SetExecutionTime(
+            GetFsm(instruction).GetExecutionTime() +
+            GetFsm(nested_instr.get()).GetExecutionTime());
       }
     }
     GetFsm(instruction).SetTimeStarted(start_time);

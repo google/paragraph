@@ -104,21 +104,31 @@ TEST(InstructionFsm, Timing) {
   EXPECT_EQ(instr_fsm.GetTimeReady(), 0.0);
   EXPECT_EQ(instr_fsm.GetTimeStarted(), 0.0);
   EXPECT_EQ(instr_fsm.GetTimeFinished(), 0.0);
+  EXPECT_EQ(instr_fsm.GetExecutionTime(), 0.0);
 
   instr_fsm.SetTimeReady(1.0);
   EXPECT_EQ(instr_fsm.GetTimeReady(), 1.0);
   EXPECT_EQ(instr_fsm.GetTimeStarted(), 0.0);
   EXPECT_EQ(instr_fsm.GetTimeFinished(), 0.0);
+  EXPECT_EQ(instr_fsm.GetExecutionTime(), 0.0);
 
   instr_fsm.SetTimeStarted(2.0);
   EXPECT_EQ(instr_fsm.GetTimeReady(), 1.0);
   EXPECT_EQ(instr_fsm.GetTimeStarted(), 2.0);
   EXPECT_EQ(instr_fsm.GetTimeFinished(), 0.0);
+  EXPECT_EQ(instr_fsm.GetExecutionTime(), 0.0);
 
   instr_fsm.SetTimeFinished(3.0);
   EXPECT_EQ(instr_fsm.GetTimeReady(), 1.0);
   EXPECT_EQ(instr_fsm.GetTimeStarted(), 2.0);
   EXPECT_EQ(instr_fsm.GetTimeFinished(), 3.0);
+  EXPECT_EQ(instr_fsm.GetExecutionTime(), 0.0);
+
+  instr_fsm.SetExecutionTime(1.0);
+  EXPECT_EQ(instr_fsm.GetTimeReady(), 1.0);
+  EXPECT_EQ(instr_fsm.GetTimeStarted(), 2.0);
+  EXPECT_EQ(instr_fsm.GetTimeFinished(), 3.0);
+  EXPECT_EQ(instr_fsm.GetExecutionTime(), 1.0);
 }
 
 // Tests instruction FSM state setters and getters
@@ -259,9 +269,11 @@ TEST(InstructionFsm, PrepareToSchedule) {
   EXPECT_EQ(scheduler->GetFsm(while_instr).GetTimeReady(), 10.0);
   EXPECT_EQ(scheduler->GetFsm(while_instr).GetTimeStarted(), 0.0);
   EXPECT_EQ(scheduler->GetFsm(while_instr).GetTimeFinished(), 0.0);
+  EXPECT_EQ(scheduler->GetFsm(while_instr).GetExecutionTime(), 0.0);
   EXPECT_EQ(scheduler->GetFsm(body_instr).GetTimeReady(), 10.0);
   EXPECT_EQ(scheduler->GetFsm(body_instr).GetTimeStarted(), 0.0);
   EXPECT_EQ(scheduler->GetFsm(body_instr).GetTimeFinished(), 0.0);
+  EXPECT_EQ(scheduler->GetFsm(body_instr).GetExecutionTime(), 0.0);
 }
 
 // Tests PickSubroutine() method
@@ -407,16 +419,19 @@ TEST(InstructionFsm, PickSubroutineCall) {
   EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeReady(), 10.0);
   EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeStarted(), 0.0);
   EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeFinished(), 0.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_1).GetExecutionTime(), 0.0);
 
   scheduler->InstructionStarted(instr_1, 15.0);
   EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeReady(), 10.0);
   EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeStarted(), 15.0);
   EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeFinished(), 0.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_1).GetExecutionTime(), 0.0);
 
   scheduler->InstructionFinished(instr_1, 20.0);
   EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeReady(), 10.0);
   EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeStarted(), 15.0);
   EXPECT_EQ(scheduler->GetFsm(instr_1).GetTimeFinished(), 20.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_1).GetExecutionTime(), 5.0);
 
   ASSERT_OK_AND_ASSIGN(picked_subroutine,
                        scheduler->GetFsm(call).PickSubroutine());
@@ -429,11 +444,13 @@ TEST(InstructionFsm, PickSubroutineCall) {
   EXPECT_EQ(scheduler->GetFsm(instr_2).GetTimeReady(), 20.0);
   EXPECT_EQ(scheduler->GetFsm(instr_2).GetTimeStarted(), 25.0);
   EXPECT_EQ(scheduler->GetFsm(instr_2).GetTimeFinished(), 0.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_2).GetExecutionTime(), 0.0);
 
   scheduler->InstructionFinished(instr_2, 30.0);
   EXPECT_EQ(scheduler->GetFsm(instr_2).GetTimeReady(), 20.0);
   EXPECT_EQ(scheduler->GetFsm(instr_2).GetTimeStarted(), 25.0);
   EXPECT_EQ(scheduler->GetFsm(instr_2).GetTimeFinished(), 30.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_2).GetExecutionTime(), 5.0);
 
   ASSERT_OK_AND_ASSIGN(picked_subroutine,
                        scheduler->GetFsm(call).PickSubroutine());
@@ -441,16 +458,19 @@ TEST(InstructionFsm, PickSubroutineCall) {
   EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeReady(), 30.0);
   EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeStarted(), 0.0);
   EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeFinished(), 0.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_3).GetExecutionTime(), 0.0);
 
   scheduler->InstructionStarted(instr_3, 35.0);
   EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeReady(), 30.0);
   EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeStarted(), 35.0);
   EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeFinished(), 0.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_3).GetExecutionTime(), 0.0);
 
   scheduler->InstructionFinished(instr_3, 40.0);
   EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeReady(), 30.0);
   EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeStarted(), 35.0);
   EXPECT_EQ(scheduler->GetFsm(instr_3).GetTimeFinished(), 40.0);
+  EXPECT_EQ(scheduler->GetFsm(instr_3).GetExecutionTime(), 5.0);
 
   EXPECT_TRUE(scheduler->GetFsm(call).IsFinished());
 }

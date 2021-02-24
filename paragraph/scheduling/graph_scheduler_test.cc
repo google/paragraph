@@ -516,6 +516,7 @@ TEST(Scheduler, LoggerIO) {
   instr_fsm.SetTimeReady(1.1);
   instr_fsm.SetTimeStarted(2.2);
   instr_fsm.SetTimeFinished(3.123456789012345);
+  instr_fsm.SetExecutionTime(0.923456789012345);
 
   std::filesystem::remove(testfile_name("logger_test.csv"));
   EXPECT_FALSE(std::filesystem::exists(testfile_name("logger_test.csv")));
@@ -534,16 +535,20 @@ TEST(Scheduler, LoggerIO) {
 
   EXPECT_TRUE(getline(testfile, header).good());
   EXPECT_EQ(header,
-            "processor_id,instruction_name,opcode,ready,started,finished");
+            "processor_id,instruction_name,opcode,ready,"
+            "started,finished,execution");
   EXPECT_TRUE(getline(testfile, line_1).good());
   EXPECT_EQ(line_1,
-            "1,dummy,delay,0.000000000000,20.200000000000,30.123456789012");
+            "1,dummy,delay,0.000000000000,20.200000000000,"
+            "30.123456789012,9.923456789012");
   EXPECT_TRUE(getline(testfile, line_2).good());
   EXPECT_EQ(line_2,
-      "1,inner_dummy,delay,30.123456789012,42.000000000000,123.000000000000");
+      "1,inner_dummy,delay,30.123456789012,42.000000000000,"
+      "123.000000000000,81.000000000000");
   EXPECT_TRUE(getline(testfile, line_3).good());
   EXPECT_EQ(line_3,
-      "1,dummy_2,call,30.123456789012,42.000000000000,123.000000000000");
+      "1,dummy_2,call,30.123456789012,42.000000000000,"
+      "123.000000000000,81.000000000000");
   EXPECT_FALSE(getline(testfile, dummy).good());
   EXPECT_EQ(dummy, "");
 }
@@ -580,10 +585,12 @@ TEST(GraphScheduler, LoggerChange) {
 
   EXPECT_TRUE(getline(testfile_1, header).good());
   EXPECT_EQ(header,
-            "processor_id,instruction_name,opcode,ready,started,finished");
+            "processor_id,instruction_name,opcode,ready,"
+            "started,finished,execution");
   EXPECT_TRUE(getline(testfile_1, line_1).good());
   EXPECT_EQ(line_1,
-            "1,dummy_1,delay,1.100000000000,2.200000000000,3.123456789012");
+            "1,dummy_1,delay,1.100000000000,2.200000000000,"
+            "3.123456789012,0.923456789012");
   EXPECT_FALSE(getline(testfile_1, dummy).good());
   EXPECT_EQ(dummy, "");
 
@@ -601,10 +608,12 @@ TEST(GraphScheduler, LoggerChange) {
 
   EXPECT_TRUE(getline(testfile_2, header).good());
   EXPECT_EQ(header,
-            "processor_id,instruction_name,opcode,ready,started,finished");
+            "processor_id,instruction_name,opcode,ready,"
+            "started,finished,execution");
   EXPECT_TRUE(getline(testfile_2, line_2).good());
   EXPECT_EQ(line_2,
-            "1,dummy_2,delay,3.123456789012,20.200000000000,30.123456789012");
+            "1,dummy_2,delay,3.123456789012,20.200000000000,"
+            "30.123456789012,9.923456789012");
   EXPECT_FALSE(getline(testfile_2, dummy).good());
   EXPECT_EQ(dummy, "");
 }
