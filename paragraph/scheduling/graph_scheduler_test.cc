@@ -498,6 +498,15 @@ TEST(Scheduler, LoggerIO) {
   graph->SetEntrySubroutine(std::move(sub));
   ASSERT_OK_AND_ASSIGN(auto instr, paragraph::Instruction::Create(
       paragraph::Opcode::kDelay, "dummy", sub_ptr, true));
+  ASSERT_OK_AND_ASSIGN(auto instr_2, paragraph::Instruction::Create(
+      paragraph::Opcode::kCall, "dummy_2", sub_ptr, true));
+  instr_2->AddOperand(instr);
+  auto inner_sub = absl::make_unique<paragraph::Subroutine>(
+      "inner_subroutine", graph.get());
+  ASSERT_OK_AND_ASSIGN(auto inner_dummy, paragraph::Instruction::Create(
+      paragraph::Opcode::kDelay, "inner_dummy", inner_sub.get(), true));
+  inner_dummy->SetOps(4);
+  instr_2->AppendInnerSubroutine(std::move(inner_sub));
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
@@ -516,10 +525,12 @@ TEST(Scheduler, LoggerIO) {
 
   scheduler->InstructionStarted(instr, 20.2);
   scheduler->InstructionFinished(instr, 30.123456789012345);
+  scheduler->InstructionStarted(inner_dummy, 42.0);
+  scheduler->InstructionFinished(inner_dummy, 123.0);
 
   EXPECT_TRUE(std::filesystem::exists(testfile_name("logger_test.csv")));
   std::ifstream testfile(testfile_name("logger_test.csv"));
-  std::string header, line_1, dummy;
+  std::string header, line_1, line_2, line_3, dummy;
 
   EXPECT_TRUE(getline(testfile, header).good());
   EXPECT_EQ(header,
@@ -527,7 +538,14 @@ TEST(Scheduler, LoggerIO) {
   EXPECT_TRUE(getline(testfile, line_1).good());
   EXPECT_EQ(line_1,
             "1,dummy,delay,0.000000000000,20.200000000000,30.123456789012");
+  EXPECT_TRUE(getline(testfile, line_2).good());
+  EXPECT_EQ(line_2,
+      "1,inner_dummy,delay,30.123456789012,42.000000000000,123.000000000000");
+  EXPECT_TRUE(getline(testfile, line_3).good());
+  EXPECT_EQ(line_3,
+      "1,dummy_2,call,30.123456789012,42.000000000000,123.000000000000");
   EXPECT_FALSE(getline(testfile, dummy).good());
+  EXPECT_EQ(dummy, "");
 }
 
 // Tests logger change
@@ -567,6 +585,7 @@ TEST(GraphScheduler, LoggerChange) {
   EXPECT_EQ(line_1,
             "1,dummy_1,delay,1.100000000000,2.200000000000,3.123456789012");
   EXPECT_FALSE(getline(testfile_1, dummy).good());
+  EXPECT_EQ(dummy, "");
 
   std::filesystem::remove(testfile_name("logger_test_2.csv"));
   EXPECT_FALSE(std::filesystem::exists(testfile_name("logger_test_2.csv")));
@@ -587,4 +606,5 @@ TEST(GraphScheduler, LoggerChange) {
   EXPECT_EQ(line_2,
             "1,dummy_2,delay,3.123456789012,20.200000000000,30.123456789012");
   EXPECT_FALSE(getline(testfile_2, dummy).good());
+  EXPECT_EQ(dummy, "");
 }

@@ -247,7 +247,7 @@ TEST(InstructionFsm, PrepareToSchedule) {
 
   ASSERT_OK_AND_ASSIGN(auto scheduler,
                        paragraph::GraphScheduler::Create(graph.get()));
-  CHECK_OK(scheduler->Initialize(0.0));
+  CHECK_OK(scheduler->Initialize(10.0));
   // Consume first available instruction, which is dummy
   auto consumed_instructions = scheduler->GetReadyInstructions();
 
@@ -255,6 +255,13 @@ TEST(InstructionFsm, PrepareToSchedule) {
   consumed_instructions = scheduler->GetReadyInstructions();
   EXPECT_EQ(consumed_instructions.size(), 1);
   EXPECT_EQ(consumed_instructions.at(0)->GetName(), "body");
+
+  EXPECT_EQ(scheduler->GetFsm(while_instr).GetTimeReady(), 10.0);
+  EXPECT_EQ(scheduler->GetFsm(while_instr).GetTimeStarted(), 0.0);
+  EXPECT_EQ(scheduler->GetFsm(while_instr).GetTimeFinished(), 0.0);
+  EXPECT_EQ(scheduler->GetFsm(body_instr).GetTimeReady(), 10.0);
+  EXPECT_EQ(scheduler->GetFsm(body_instr).GetTimeStarted(), 0.0);
+  EXPECT_EQ(scheduler->GetFsm(body_instr).GetTimeFinished(), 0.0);
 }
 
 // Tests PickSubroutine() method

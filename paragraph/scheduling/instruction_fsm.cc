@@ -141,6 +141,18 @@ absl::Status InstructionFsm::PrepareToSchedule() {
   // If instruction has inner subroutines, we don't schedule it directly,
   // instead we schedule inner subroutines and its instructionss
   if (!instruction_->InnerSubroutines().empty()) {
+    // If we see instruction with its subroutines for the first time, set ready
+    // and started time immediately
+    bool seen = false;
+    for (auto& subroutine : instruction_->InnerSubroutines()) {
+      if (subroutine->GetExecutionCount() !=
+          scheduler_->GetFsm(subroutine.get()).GetExecutionCount()) {
+        seen = true;
+      }
+    }
+    if (!seen & !IsScheduled()) {
+      SetTimeReady(scheduler_->GetCurrentTime());
+    }
     SetScheduled();
     ASSIGN_OR_RETURN(Subroutine* subroutine, PickSubroutine());
     // Check if subroutine is not finished yet
@@ -159,6 +171,9 @@ absl::Status InstructionFsm::PrepareToSchedule() {
     // If we see Null opcode, which is ParaGraph internal opcode, we do not
     // schedule it through scheduler and just instantly execute it
     if (instruction_->GetOpcode() == Opcode::kNull) {
+      SetTimeReady(scheduler_->GetCurrentTime());
+      scheduler_->InstructionStarted(instruction_,
+                                      scheduler_->GetCurrentTime());
       scheduler_->InstructionFinished(instruction_,
                                       scheduler_->GetCurrentTime());
     } else {
