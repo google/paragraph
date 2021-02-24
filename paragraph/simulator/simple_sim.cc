@@ -39,7 +39,7 @@ shim::StatusOr<std::unique_ptr<SimpleSim>> SimpleSim::Create(
 
 absl::Status SimpleSim::StartSimulation(double start_time) {
   time_ = start_time;
-  scheduler_->Initialize(time_);
+  RETURN_IF_ERROR(scheduler_->Initialize(time_));
   RETURN_IF_ERROR(FetchAndExecute());
   return absl::OkStatus();
 }
