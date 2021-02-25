@@ -14,6 +14,7 @@
  */
 #include "paragraph/scheduling/instruction_fsm.h"
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -132,6 +133,10 @@ void InstructionFsm::SetExecutionTime(double current_time) {
 }
 
 void InstructionFsm::Reset() {
+  SetTimeReady(0.0);
+  SetTimeStarted(0.0);
+  SetTimeFinished(0.0);
+  SetExecutionTime(0.0);
   if (instruction_->Operands().empty()) {
     state_ = State::kReady;
   } else {
@@ -220,6 +225,24 @@ shim::StatusOr<Subroutine*> InstructionFsm::PickSubroutine() {
     if (scheduler_->GetFsm(body_subroutine).IsFinished() &&
         scheduler_->GetFsm(condition_subroutine).IsFinished() &&
         scheduler_->GetFsm(condition_subroutine).GetExecutionCount() > 0) {
+      // If while wasn't executed yet, meaning its a first iteration, flag it
+      // and  set the start time as the start time of the earliest instruction
+      // in the loop.
+      bool first_encounter = GetExecutionTime() == 0;
+      double start_time = scheduler_->GetCurrentTime();
+      // Increment while execution time every iteration
+      for (auto& subroutine : instruction_->InnerSubroutines()) {
+        for (auto& nested_instr : subroutine->Instructions()) {
+          start_time = std::min(
+              start_time,
+              scheduler_->GetFsm(nested_instr.get()).GetTimeStarted());
+          SetExecutionTime(GetExecutionTime() +
+              scheduler_->GetFsm(nested_instr.get()).GetExecutionTime());
+        }
+      }
+      if (first_encounter) {
+        SetTimeStarted(start_time);
+      }
       scheduler_->GetFsm(body_subroutine).Reset(false);
       scheduler_->GetFsm(condition_subroutine).Reset(false);
     }

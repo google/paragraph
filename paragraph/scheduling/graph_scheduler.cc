@@ -116,7 +116,11 @@ void GraphScheduler::InstructionFinished(
             GetFsm(nested_instr.get()).GetExecutionTime());
       }
     }
-    GetFsm(instruction).SetTimeStarted(start_time);
+    // We consider while instruction separately as we need to set start timer
+    // only once and not set it every loop iteration
+    if (instruction->GetOpcode() != Opcode::kWhile) {
+      GetFsm(instruction).SetTimeStarted(start_time);
+    }
   }
   // Log instruction
   if (HasLogger()) {
