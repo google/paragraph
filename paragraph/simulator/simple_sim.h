@@ -51,16 +51,17 @@ class SimpleSim {
 
   ~SimpleSim() = default;
 
-  // Creates a new simulator given the graph. It verifies that graph is valid,
-  // creates a scheduler, provides it a logger (if given)
+  // Creates a new simulator given the graph and performance parameters of the
+  // simulates system. It verifies that graph is valid, creates a scheduler,
+  // and provides it a logger if it was created
   static shim::StatusOr<std::unique_ptr<SimpleSim>> Create(
       std::unique_ptr<Graph> graph,
       const PerformanceParameters& processor_parameters,
       std::unique_ptr<Logger> logger = nullptr);
 
   // Starts simulation at a given time. Simulation fetches instructions
-  // immediately and is going to finish only when there are new instructions to
-  // fetch, and no instructions are left to execute
+  // immediately and is going to finish only when there are no new instructions
+  // to fetch, and no instructions are left to execute
   absl::Status StartSimulation(double start_time = 0);
 
   // Fetches instructions from the scheduler and executes it incrementing

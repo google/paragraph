@@ -81,8 +81,8 @@ absl::Status SimpleSim::FetchAndExecute() {
                (opcode == Opcode::kSendDone) ||
                (opcode == Opcode::kRecvDone)) {
       // We model SendDone and RecvStart as instant so network instructions
-      // don't block execution unless there is a packet transfer
-      // We model RecvDone to be instant as we expect that data laready was
+      // don't block execution unless there is a packet transfer.
+      // We model RecvDone to be instant as we expect that data already was
       // transfered, and to avoid accounting network delay twice for SendStart
       // and RecvDone corresponding to the same communication
       scheduler_->InstructionFinished(executing_instruction, time_);
