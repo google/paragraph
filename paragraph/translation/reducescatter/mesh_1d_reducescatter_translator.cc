@@ -101,7 +101,7 @@ shim::StatusOr<std::unique_ptr<Subroutine>>
             {comm_group.at(ccw_peer_index)});
         ccw_sendrecv->SetBytesOut(comm_size / comm_group.size());
       } else if (!ccw_send_flag && ccw_recv_flag) {
-      // If only receives from CCW but doesn't send there
+        // If only receives from CCW but doesn't send there
         ASSIGN_OR_RETURN(ccw_sendrecv, Instruction::Create(
             Opcode::kRecv,
             absl::StrCat(name_prefix,
