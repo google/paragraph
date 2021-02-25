@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PARAGRAPH_TRANSLATION_ALLGATHER_MESH_2D_RING_ALLGATHER_TRANSLATOR_H_
-#define PARAGRAPH_TRANSLATION_ALLGATHER_MESH_2D_RING_ALLGATHER_TRANSLATOR_H_
+#ifndef PARAGRAPH_TRANSLATION_ALLGATHER_RING_OVER_2D_GRID_ALLGATHER_TRANSLATOR_H_
+#define PARAGRAPH_TRANSLATION_ALLGATHER_RING_OVER_2D_GRID_ALLGATHER_TRANSLATOR_H_
 
 #include <memory>
 #include <string>
@@ -23,20 +23,22 @@
 
 namespace paragraph {
 
-/* Mesh2dRingAllGatherTranslator models a all-gather collective on the
- * 2D-Mesh topology as if it was a ring topology. Communication group is changed
- * so all communication happens on a ring swizzled through the 2D Mesh. In this
- * translation, communication happens only between two neighbors of each
- * processor, even though there are four neighbors for each processor on the
- * mesh (except for edge and corner processors). On the mesh of size M x N, each
- * step the algorithm moves 1 / (M x N)-th of total data. In case of non-trivial
- * concentration, the concentrated nodes become neighbors on the ring and
- * consume concentrator bandwidth (i.e. on-chip bw for multi-core processors).
+/* RingOver2dGridAllGatherTranslator models a all-gather collective on the
+ * 2D-Grid topology as if it was a ring topology. In this context, 2D Grid means
+ * 2D Mesh or 2D Torus with all processors placed on an integer coordinate grid.
+ * Communication group is changed so all communication happens on a ring
+ * swizzled through the 2D Grid. In this translation, communication happens only
+ * between two neighbors of each processor, even though there are four neighbors
+ * for each processor on the mesh (except for edge and corner processors).
+ * On the mesh of size M x N, each step the algorithm moves 1 / (M x N)-th of
+ * total data. In case of non-trivial concentration, the concentrated nodes
+ * become neighbors on the ring and consume concentrator bandwidth
+ * (i.e. on-chip bw for multi-core processors).
  */
-class Mesh2dRingAllGatherTranslator : public AllGatherTranslator {
+class RingOver2dGridAllGatherTranslator : public AllGatherTranslator {
  public:
-  explicit Mesh2dRingAllGatherTranslator(nlohmann::json config);
-  ~Mesh2dRingAllGatherTranslator() = default;
+  explicit RingOver2dGridAllGatherTranslator(nlohmann::json config);
+  ~RingOver2dGridAllGatherTranslator() = default;
 
   shim::StatusOr<std::unique_ptr<Subroutine>> GetSubroutine(
       const std::string& name_prefix,
@@ -57,4 +59,4 @@ class Mesh2dRingAllGatherTranslator : public AllGatherTranslator {
 
 }  // namespace paragraph
 
-#endif  // PARAGRAPH_TRANSLATION_ALLGATHER_MESH_2D_RING_ALLGATHER_TRANSLATOR_H_
+#endif  // PARAGRAPH_TRANSLATION_ALLGATHER_RING_OVER_2D_GRID_ALLGATHER_TRANSLATOR_H_

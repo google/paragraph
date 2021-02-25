@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "paragraph/translation/allreduce/mesh_2d_ring_allreduce_translator.h"
+#include "paragraph/translation/allreduce/ring_over_2d_grid_allreduce_translator.h"
 
 #include <memory>
 #include <string>
@@ -24,8 +24,8 @@
 #include "paragraph/shim/test_macros.h"
 #include "paragraph/translation/translation_map.h"
 
-// Tests expanding 2D-Mesh all-reduce
-TEST(Mesh2dRingAllReduce, NoBarrier) {
+// Tests expanding 2D-Grid all-reduce
+TEST(RingOver2dGridAllReduce, NoBarrier) {
   auto graph = absl::make_unique<paragraph::Graph>("test_graph", 2);
   auto sub = absl::make_unique<paragraph::Subroutine>(
       "test_subroutine", graph.get());
@@ -66,7 +66,7 @@ TEST(Mesh2dRingAllReduce, NoBarrier) {
   nlohmann::json config = R"(
     {
       "all-reduce": {
-        "algorithm": "mesh-2d-ring",
+        "algorithm": "ring-2d-grid",
         "concentration": 1,
         "dimension_widths": [2, 2]
       }
@@ -96,7 +96,7 @@ inner_subroutines {
   execution_probability: 1
   execution_count: 1
   instructions {
-    name: "all-reduce_mesh-2d-ring"
+    name: "all-reduce_ring-2d-grid"
     opcode: "all-reduce"
     instruction_id: 7
     bytes_out: 48
@@ -107,12 +107,12 @@ inner_subroutines {
       group_ids: 1
     }
     inner_subroutines {
-      name: "all-reduce_mesh-2d-ring_bidir-ring"
+      name: "all-reduce_ring-2d-grid_bidir-ring"
       subroutine_root_id: 42
       execution_probability: 1
       execution_count: 1
       instructions {
-        name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter"
+        name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter"
         opcode: "reduce-scatter"
         instruction_id: 8
         bytes_out: 48
@@ -123,12 +123,12 @@ inner_subroutines {
           group_ids: 1
         }
         inner_subroutines {
-          name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring"
+          name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring"
           subroutine_root_id: 41
           execution_probability: 1
           execution_count: 1
           instructions {
-            name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_cw"
+            name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_cw"
             opcode: "reduce-scatter"
             instruction_id: 9
             bytes_out: 24
@@ -139,12 +139,12 @@ inner_subroutines {
               group_ids: 1
             }
             inner_subroutines {
-              name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring"
+              name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring"
               subroutine_root_id: 21
               execution_probability: 1
               execution_count: 1
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_sendrecv_1"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_sendrecv_1"
                 opcode: "sendrecv"
                 instruction_id: 10
                 bytes_in: 6
@@ -155,7 +155,7 @@ inner_subroutines {
                 }
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_reduction_1"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_reduction_1"
                 opcode: "call"
                 instruction_id: 11
                 operand_ids: 10
@@ -187,7 +187,7 @@ inner_subroutines {
                 }
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_sendrecv_2"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_sendrecv_2"
                 opcode: "sendrecv"
                 instruction_id: 15
                 bytes_in: 6
@@ -199,7 +199,7 @@ inner_subroutines {
                 operand_ids: 11
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_reduction_2"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_reduction_2"
                 opcode: "call"
                 instruction_id: 16
                 operand_ids: 15
@@ -231,7 +231,7 @@ inner_subroutines {
                 }
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_sendrecv_3"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_sendrecv_3"
                 opcode: "sendrecv"
                 instruction_id: 20
                 bytes_in: 6
@@ -243,7 +243,7 @@ inner_subroutines {
                 operand_ids: 16
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_reduction_3"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_reduction_3"
                 opcode: "call"
                 instruction_id: 21
                 operand_ids: 20
@@ -277,7 +277,7 @@ inner_subroutines {
             }
           }
           instructions {
-            name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_ccw"
+            name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_ccw"
             opcode: "reduce-scatter"
             instruction_id: 25
             bytes_out: 24
@@ -288,12 +288,12 @@ inner_subroutines {
               group_ids: 0
             }
             inner_subroutines {
-              name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring"
+              name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring"
               subroutine_root_id: 37
               execution_probability: 1
               execution_count: 1
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_sendrecv_1"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_sendrecv_1"
                 opcode: "sendrecv"
                 instruction_id: 26
                 bytes_in: 6
@@ -304,7 +304,7 @@ inner_subroutines {
                 }
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_reduction_1"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_reduction_1"
                 opcode: "call"
                 instruction_id: 27
                 operand_ids: 26
@@ -336,7 +336,7 @@ inner_subroutines {
                 }
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_sendrecv_2"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_sendrecv_2"
                 opcode: "sendrecv"
                 instruction_id: 31
                 bytes_in: 6
@@ -348,7 +348,7 @@ inner_subroutines {
                 operand_ids: 27
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_reduction_2"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_reduction_2"
                 opcode: "call"
                 instruction_id: 32
                 operand_ids: 31
@@ -380,7 +380,7 @@ inner_subroutines {
                 }
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_sendrecv_3"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_sendrecv_3"
                 opcode: "sendrecv"
                 instruction_id: 36
                 bytes_in: 6
@@ -392,7 +392,7 @@ inner_subroutines {
                 operand_ids: 32
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_reduction_3"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_reduction_3"
                 opcode: "call"
                 instruction_id: 37
                 operand_ids: 36
@@ -426,7 +426,7 @@ inner_subroutines {
             }
           }
           instructions {
-            name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_root_2"
+            name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_root_2"
             opcode: "null"
             instruction_id: 41
             operand_ids: 9
@@ -435,7 +435,7 @@ inner_subroutines {
         }
       }
       instructions {
-        name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather"
+        name: "all-reduce_ring-2d-grid_bidir-ring_all-gather"
         opcode: "all-gather"
         instruction_id: 42
         bytes_out: 48
@@ -447,12 +447,12 @@ inner_subroutines {
         }
         operand_ids: 8
         inner_subroutines {
-          name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring"
+          name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring"
           subroutine_root_id: 51
           execution_probability: 1
           execution_count: 1
           instructions {
-            name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_cw"
+            name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_cw"
             opcode: "all-gather"
             instruction_id: 43
             bytes_out: 24
@@ -463,12 +463,12 @@ inner_subroutines {
               group_ids: 1
             }
             inner_subroutines {
-              name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_cw_unidir-ring"
+              name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_cw_unidir-ring"
               subroutine_root_id: 46
               execution_probability: 1
               execution_count: 1
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_cw_unidir-ring_sendrecv_1"
+                name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_cw_unidir-ring_sendrecv_1"
                 opcode: "sendrecv"
                 instruction_id: 44
                 bytes_in: 6
@@ -479,7 +479,7 @@ inner_subroutines {
                 }
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_cw_unidir-ring_sendrecv_2"
+                name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_cw_unidir-ring_sendrecv_2"
                 opcode: "sendrecv"
                 instruction_id: 45
                 bytes_in: 6
@@ -491,7 +491,7 @@ inner_subroutines {
                 operand_ids: 44
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_cw_unidir-ring_sendrecv_3"
+                name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_cw_unidir-ring_sendrecv_3"
                 opcode: "sendrecv"
                 instruction_id: 46
                 bytes_in: 6
@@ -505,7 +505,7 @@ inner_subroutines {
             }
           }
           instructions {
-            name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_ccw"
+            name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_ccw"
             opcode: "all-gather"
             instruction_id: 47
             bytes_out: 24
@@ -516,12 +516,12 @@ inner_subroutines {
               group_ids: 0
             }
             inner_subroutines {
-              name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_ccw_unidir-ring"
+              name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_ccw_unidir-ring"
               subroutine_root_id: 50
               execution_probability: 1
               execution_count: 1
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_ccw_unidir-ring_sendrecv_1"
+                name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_ccw_unidir-ring_sendrecv_1"
                 opcode: "sendrecv"
                 instruction_id: 48
                 bytes_in: 6
@@ -532,7 +532,7 @@ inner_subroutines {
                 }
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_ccw_unidir-ring_sendrecv_2"
+                name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_ccw_unidir-ring_sendrecv_2"
                 opcode: "sendrecv"
                 instruction_id: 49
                 bytes_in: 6
@@ -544,7 +544,7 @@ inner_subroutines {
                 operand_ids: 48
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_ccw_unidir-ring_sendrecv_3"
+                name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_ccw_unidir-ring_sendrecv_3"
                 opcode: "sendrecv"
                 instruction_id: 50
                 bytes_in: 6
@@ -558,7 +558,7 @@ inner_subroutines {
             }
           }
           instructions {
-            name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_root_2"
+            name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_root_2"
             opcode: "null"
             instruction_id: 51
             operand_ids: 43
@@ -576,8 +576,8 @@ inner_subroutines {
       allreduce->ToProto().value(), allreduce_proto));
 }
 
-// Tests expanding 2D-Mesh all-reduce with barrier
-TEST(Mesh2dRingAllReduce, WithBarrier) {
+// Tests expanding 2D-Grid all-reduce with barrier
+TEST(RingOver2dGridAllReduce, WithBarrier) {
   auto graph = absl::make_unique<paragraph::Graph>("test_graph", 2);
   auto sub = absl::make_unique<paragraph::Subroutine>(
       "test_subroutine", graph.get());
@@ -618,7 +618,7 @@ TEST(Mesh2dRingAllReduce, WithBarrier) {
   nlohmann::json config = R"(
     {
       "all-reduce": {
-        "algorithm": "mesh-2d-ring",
+        "algorithm": "ring-2d-grid",
         "concentration": 1,
         "dimension_widths": [2, 2],
         "barrier": {
@@ -651,7 +651,7 @@ inner_subroutines {
   execution_probability: 1
   execution_count: 1
   instructions {
-    name: "all-reduce_mesh-2d-ring"
+    name: "all-reduce_ring-2d-grid"
     opcode: "all-reduce"
     instruction_id: 7
     bytes_out: 48
@@ -662,12 +662,12 @@ inner_subroutines {
       group_ids: 1
     }
     inner_subroutines {
-      name: "all-reduce_mesh-2d-ring_bidir-ring"
+      name: "all-reduce_ring-2d-grid_bidir-ring"
       subroutine_root_id: 45
       execution_probability: 1
       execution_count: 1
       instructions {
-        name: "all-reduce_mesh-2d-ring_bidir-ring_barrier"
+        name: "all-reduce_ring-2d-grid_bidir-ring_barrier"
         opcode: "barrier"
         instruction_id: 8
         communication_groups {
@@ -677,12 +677,12 @@ inner_subroutines {
           group_ids: 1
         }
         inner_subroutines {
-          name: "all-reduce_mesh-2d-ring_bidir-ring_barrier_centralized"
+          name: "all-reduce_ring-2d-grid_bidir-ring_barrier_centralized"
           subroutine_root_id: 10
           execution_probability: 1
           execution_count: 1
           instructions {
-            name: "all-reduce_mesh-2d-ring_bidir-ring_barrier_centralized_send_to_0"
+            name: "all-reduce_ring-2d-grid_bidir-ring_barrier_centralized_send_to_0"
             opcode: "send"
             instruction_id: 9
             communication_groups {
@@ -690,7 +690,7 @@ inner_subroutines {
             }
           }
           instructions {
-            name: "all-reduce_mesh-2d-ring_bidir-ring_barrier_centralized_recv_from_0"
+            name: "all-reduce_ring-2d-grid_bidir-ring_barrier_centralized_recv_from_0"
             opcode: "recv"
             instruction_id: 10
             communication_groups {
@@ -701,7 +701,7 @@ inner_subroutines {
         }
       }
       instructions {
-        name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter"
+        name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter"
         opcode: "reduce-scatter"
         instruction_id: 11
         bytes_out: 48
@@ -713,12 +713,12 @@ inner_subroutines {
         }
         operand_ids: 8
         inner_subroutines {
-          name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring"
+          name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring"
           subroutine_root_id: 44
           execution_probability: 1
           execution_count: 1
           instructions {
-            name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_cw"
+            name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_cw"
             opcode: "reduce-scatter"
             instruction_id: 12
             bytes_out: 24
@@ -729,12 +729,12 @@ inner_subroutines {
               group_ids: 1
             }
             inner_subroutines {
-              name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring"
+              name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring"
               subroutine_root_id: 24
               execution_probability: 1
               execution_count: 1
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_sendrecv_1"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_sendrecv_1"
                 opcode: "sendrecv"
                 instruction_id: 13
                 bytes_in: 6
@@ -745,7 +745,7 @@ inner_subroutines {
                 }
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_reduction_1"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_reduction_1"
                 opcode: "call"
                 instruction_id: 14
                 operand_ids: 13
@@ -777,7 +777,7 @@ inner_subroutines {
                 }
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_sendrecv_2"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_sendrecv_2"
                 opcode: "sendrecv"
                 instruction_id: 18
                 bytes_in: 6
@@ -789,7 +789,7 @@ inner_subroutines {
                 operand_ids: 14
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_reduction_2"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_reduction_2"
                 opcode: "call"
                 instruction_id: 19
                 operand_ids: 18
@@ -821,7 +821,7 @@ inner_subroutines {
                 }
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_sendrecv_3"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_sendrecv_3"
                 opcode: "sendrecv"
                 instruction_id: 23
                 bytes_in: 6
@@ -833,7 +833,7 @@ inner_subroutines {
                 operand_ids: 19
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_reduction_3"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_cw_unidir-ring_reduction_3"
                 opcode: "call"
                 instruction_id: 24
                 operand_ids: 23
@@ -867,7 +867,7 @@ inner_subroutines {
             }
           }
           instructions {
-            name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_ccw"
+            name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_ccw"
             opcode: "reduce-scatter"
             instruction_id: 28
             bytes_out: 24
@@ -878,12 +878,12 @@ inner_subroutines {
               group_ids: 0
             }
             inner_subroutines {
-              name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring"
+              name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring"
               subroutine_root_id: 40
               execution_probability: 1
               execution_count: 1
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_sendrecv_1"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_sendrecv_1"
                 opcode: "sendrecv"
                 instruction_id: 29
                 bytes_in: 6
@@ -894,7 +894,7 @@ inner_subroutines {
                 }
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_reduction_1"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_reduction_1"
                 opcode: "call"
                 instruction_id: 30
                 operand_ids: 29
@@ -926,7 +926,7 @@ inner_subroutines {
                 }
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_sendrecv_2"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_sendrecv_2"
                 opcode: "sendrecv"
                 instruction_id: 34
                 bytes_in: 6
@@ -938,7 +938,7 @@ inner_subroutines {
                 operand_ids: 30
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_reduction_2"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_reduction_2"
                 opcode: "call"
                 instruction_id: 35
                 operand_ids: 34
@@ -970,7 +970,7 @@ inner_subroutines {
                 }
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_sendrecv_3"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_sendrecv_3"
                 opcode: "sendrecv"
                 instruction_id: 39
                 bytes_in: 6
@@ -982,7 +982,7 @@ inner_subroutines {
                 operand_ids: 35
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_reduction_3"
+                name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_ccw_unidir-ring_reduction_3"
                 opcode: "call"
                 instruction_id: 40
                 operand_ids: 39
@@ -1016,7 +1016,7 @@ inner_subroutines {
             }
           }
           instructions {
-            name: "all-reduce_mesh-2d-ring_bidir-ring_reduce-scatter_bidir-ring_root_2"
+            name: "all-reduce_ring-2d-grid_bidir-ring_reduce-scatter_bidir-ring_root_2"
             opcode: "null"
             instruction_id: 44
             operand_ids: 12
@@ -1025,7 +1025,7 @@ inner_subroutines {
         }
       }
       instructions {
-        name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather"
+        name: "all-reduce_ring-2d-grid_bidir-ring_all-gather"
         opcode: "all-gather"
         instruction_id: 45
         bytes_out: 48
@@ -1037,12 +1037,12 @@ inner_subroutines {
         }
         operand_ids: 11
         inner_subroutines {
-          name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring"
+          name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring"
           subroutine_root_id: 54
           execution_probability: 1
           execution_count: 1
           instructions {
-            name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_cw"
+            name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_cw"
             opcode: "all-gather"
             instruction_id: 46
             bytes_out: 24
@@ -1053,12 +1053,12 @@ inner_subroutines {
               group_ids: 1
             }
             inner_subroutines {
-              name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_cw_unidir-ring"
+              name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_cw_unidir-ring"
               subroutine_root_id: 49
               execution_probability: 1
               execution_count: 1
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_cw_unidir-ring_sendrecv_1"
+                name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_cw_unidir-ring_sendrecv_1"
                 opcode: "sendrecv"
                 instruction_id: 47
                 bytes_in: 6
@@ -1069,7 +1069,7 @@ inner_subroutines {
                 }
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_cw_unidir-ring_sendrecv_2"
+                name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_cw_unidir-ring_sendrecv_2"
                 opcode: "sendrecv"
                 instruction_id: 48
                 bytes_in: 6
@@ -1081,7 +1081,7 @@ inner_subroutines {
                 operand_ids: 47
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_cw_unidir-ring_sendrecv_3"
+                name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_cw_unidir-ring_sendrecv_3"
                 opcode: "sendrecv"
                 instruction_id: 49
                 bytes_in: 6
@@ -1095,7 +1095,7 @@ inner_subroutines {
             }
           }
           instructions {
-            name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_ccw"
+            name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_ccw"
             opcode: "all-gather"
             instruction_id: 50
             bytes_out: 24
@@ -1106,12 +1106,12 @@ inner_subroutines {
               group_ids: 0
             }
             inner_subroutines {
-              name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_ccw_unidir-ring"
+              name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_ccw_unidir-ring"
               subroutine_root_id: 53
               execution_probability: 1
               execution_count: 1
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_ccw_unidir-ring_sendrecv_1"
+                name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_ccw_unidir-ring_sendrecv_1"
                 opcode: "sendrecv"
                 instruction_id: 51
                 bytes_in: 6
@@ -1122,7 +1122,7 @@ inner_subroutines {
                 }
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_ccw_unidir-ring_sendrecv_2"
+                name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_ccw_unidir-ring_sendrecv_2"
                 opcode: "sendrecv"
                 instruction_id: 52
                 bytes_in: 6
@@ -1134,7 +1134,7 @@ inner_subroutines {
                 operand_ids: 51
               }
               instructions {
-                name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_ccw_unidir-ring_sendrecv_3"
+                name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_ccw_unidir-ring_sendrecv_3"
                 opcode: "sendrecv"
                 instruction_id: 53
                 bytes_in: 6
@@ -1148,7 +1148,7 @@ inner_subroutines {
             }
           }
           instructions {
-            name: "all-reduce_mesh-2d-ring_bidir-ring_all-gather_bidir-ring_root_2"
+            name: "all-reduce_ring-2d-grid_bidir-ring_all-gather_bidir-ring_root_2"
             opcode: "null"
             instruction_id: 54
             operand_ids: 46

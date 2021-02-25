@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PARAGRAPH_TRANSLATION_REDUCESCATTER_MESH_2D_RING_REDUCESCATTER_TRANSLATOR_H_
-#define PARAGRAPH_TRANSLATION_REDUCESCATTER_MESH_2D_RING_REDUCESCATTER_TRANSLATOR_H_
+#ifndef PARAGRAPH_TRANSLATION_REDUCESCATTER_RING_OVER_2D_GRID_REDUCESCATTER_TRANSLATOR_H_
+#define PARAGRAPH_TRANSLATION_REDUCESCATTER_RING_OVER_2D_GRID_REDUCESCATTER_TRANSLATOR_H_
 
 #include <memory>
 #include <string>
@@ -23,20 +23,22 @@
 
 namespace paragraph {
 
-/* Mesh2dRingReduceScatterTranslator models a reduce-scatter collective on the
- * 2D-Mesh topology as if it was a ring topology. Communication group is changed
- * so all communication happens on a ring swizzled through the 2D Mesh. In this
- * ranslation, communication happens only between two neighbors of each
- * processor, even though there are four neighbors for each processor on the
- * mesh (except for edge and corner processors). On the mesh of size M x N, each
- * step the algorithm moves 1 / (M x N)-th of total data. In case of non-trivial
- * concentration, the concentrated nodes become neighbors on the ring and
- * consume concentrator bandwidth (i.e. on-chip bw for multi-core processors).
+/* RingOver2dGridReduceScatterTranslator models a reduce-scatter collective on
+ * the 2D-Grid topology as if it was a ring topology. In this context, 2D Grid
+ * means 2D Mesh or 2D Torus with all processors placed on an integer coordinate
+ * grid. Communication group is changed so all communication happens on a ring
+ * swizzled through the 2D Grid. In this ranslation, communication happens only
+ * between two neighbors of each processor, even though there are four neighbors
+ * for each processor on the mesh (except for edge and corner processors).
+ * On the mesh of size M x N, each step the algorithm moves 1 / (M x N)-th of
+ * total data. In case of non-trivial concentration, the concentrated nodes
+ * become neighbors on the ring and consume concentrator bandwidth
+ * (i.e. on-chip bw for multi-core processors).
  */
-class Mesh2dRingReduceScatterTranslator : public ReduceScatterTranslator {
+class RingOver2dGridReduceScatterTranslator : public ReduceScatterTranslator {
  public:
-  explicit Mesh2dRingReduceScatterTranslator(nlohmann::json config);
-  ~Mesh2dRingReduceScatterTranslator() = default;
+  explicit RingOver2dGridReduceScatterTranslator(nlohmann::json config);
+  ~RingOver2dGridReduceScatterTranslator() = default;
 
   shim::StatusOr<std::unique_ptr<Subroutine>> GetSubroutine(
       Subroutine* reduction_subroutine,
@@ -58,4 +60,4 @@ class Mesh2dRingReduceScatterTranslator : public ReduceScatterTranslator {
 
 }  // namespace paragraph
 
-#endif  // PARAGRAPH_TRANSLATION_REDUCESCATTER_MESH_2D_RING_REDUCESCATTER_TRANSLATOR_H_
+#endif  // PARAGRAPH_TRANSLATION_REDUCESCATTER_RING_OVER_2D_GRID_REDUCESCATTER_TRANSLATOR_H_

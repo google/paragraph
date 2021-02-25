@@ -26,16 +26,16 @@ cc_library(
         "bidir_ring_allreduce_translator.cc",
         "mesh_1d_allreduce_translator.cc",
         "mesh_2d_allreduce_translator.cc",
+        "ring_over_2d_grid_allreduce_translator.cc",
         "torus_2d_allreduce_translator.cc",
-        "mesh_2d_ring_allreduce_translator.cc",
         "unidir_ring_allreduce_translator.cc",
     ],
     hdrs = [
         "bidir_ring_allreduce_translator.h",
         "mesh_1d_allreduce_translator.h",
         "mesh_2d_allreduce_translator.h",
+        "ring_over_2d_grid_allreduce_translator.h",
         "torus_2d_allreduce_translator.h",
-        "mesh_2d_ring_allreduce_translator.h",
         "unidir_ring_allreduce_translator.h",
     ],
     deps = [
@@ -64,8 +64,8 @@ cc_test(
         "bidir_ring_allreduce_translator_test.cc",
         "mesh_1d_allreduce_translator_test.cc",
         "mesh_2d_allreduce_translator_test.cc",
+        "ring_over_2d_grid_allreduce_translator_test.cc",
         "torus_2d_allreduce_translator_test.cc",
-        "mesh_2d_ring_allreduce_translator_test.cc",
         "unidir_ring_allreduce_translator_test.cc",
     ],
     deps = [

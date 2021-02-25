@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PARAGRAPH_TRANSLATION_ALLREDUCE_MESH_2D_RING_ALLREDUCE_TRANSLATOR_H_
-#define PARAGRAPH_TRANSLATION_ALLREDUCE_MESH_2D_RING_ALLREDUCE_TRANSLATOR_H_
+#ifndef PARAGRAPH_TRANSLATION_ALLREDUCE_RING_OVER_2D_GRID_ALLREDUCE_TRANSLATOR_H_
+#define PARAGRAPH_TRANSLATION_ALLREDUCE_RING_OVER_2D_GRID_ALLREDUCE_TRANSLATOR_H_
 
 #include <memory>
 #include <string>
@@ -24,20 +24,22 @@
 
 namespace paragraph {
 
-/* Mesh2dRingAllReduceTranslator models an all-reduce collective on the
- * 2D-Mesh topology as if it was a ring topology. Communication group is changed
- * so all communication happens on a ring swizzled through the 2D Mesh. In this
- * translation, communication happens only between two neighbors of each
- * processor, even though there are four neighbors for each processor on the
- * mesh (except for edge and corner processors). On the mesh of size M x N, each
- * step the algorithm moves 1 / (M x N)-th of total data. In case of non-trivial
- * concentration, the concentrated nodes become neighbors on the ring and
- * consume concentrator bandwidth (i.e. on-chip bw for multi-core processors).
+/* RingOver2dGridAllReduceTranslator models an all-reduce collective on the
+ * 2D-Grid topology as if it was a ring topology. In this context, 2D Grid means
+ * 2D Mesh or 2D Torus with all processors placed on an integer coordinate grid.
+ * Communication group is changed so all communication happens on a ring
+ * swizzled through the 2D Grid. In this translation, communication happens only
+ * between two neighbors of each processor, even though there are four neighbors
+ * for each processor on the mesh (except for edge and corner processors).
+ * On the mesh of size M x N, each step the algorithm moves 1 / (M x N)-th of
+ * total data. In case of non-trivial concentration, the concentrated nodes
+ * become neighbors on the ring and consume concentrator bandwidth
+ * (i.e. on-chip bw for multi-core processors).
  */
-class Mesh2dRingAllReduceTranslator : public AllReduceTranslator {
+class RingOver2dGridAllReduceTranslator : public AllReduceTranslator {
  public:
-  explicit Mesh2dRingAllReduceTranslator(nlohmann::json config);
-  ~Mesh2dRingAllReduceTranslator() = default;
+  explicit RingOver2dGridAllReduceTranslator(nlohmann::json config);
+  ~RingOver2dGridAllReduceTranslator() = default;
 
   shim::StatusOr<std::unique_ptr<Subroutine>> GetSubroutine(
       Subroutine* reduction_subroutine,
@@ -59,4 +61,4 @@ class Mesh2dRingAllReduceTranslator : public AllReduceTranslator {
 
 }  // namespace paragraph
 
-#endif  // PARAGRAPH_TRANSLATION_ALLREDUCE_MESH_2D_RING_ALLREDUCE_TRANSLATOR_H_
+#endif  // PARAGRAPH_TRANSLATION_ALLREDUCE_RING_OVER_2D_GRID_ALLREDUCE_TRANSLATOR_H_

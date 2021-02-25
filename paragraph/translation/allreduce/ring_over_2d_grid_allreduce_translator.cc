@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "paragraph/translation/allreduce/mesh_2d_ring_allreduce_translator.h"
+#include "paragraph/translation/allreduce/ring_over_2d_grid_allreduce_translator.h"
 
 #include <memory>
 #include <string>
@@ -23,17 +23,17 @@
 
 namespace paragraph {
 
-Mesh2dRingAllReduceTranslator::Mesh2dRingAllReduceTranslator(
+RingOver2dGridAllReduceTranslator::RingOver2dGridAllReduceTranslator(
     nlohmann::json config) {
   CHECK_NE(config.find("dimension_widths"), config.end()) <<
-      "2D Mesh should have field 'dimension_widths' as an array of size 2.";
+      "2D Grid should have field 'dimension_widths' as an array of size 2.";
   CHECK(config["dimension_widths"].is_array()) <<
-      "2D Mesh config field 'dimension_widths' should be an array.";
+      "2D Grid config field 'dimension_widths' should be an array.";
   CHECK_EQ(config["dimension_widths"].size(), 2) <<
-      "2D Mesh config field 'dimension_widths' should should have size 2.";
+      "2D Grid config field 'dimension_widths' should should have size 2.";
   for (size_t i = 0; i < config["dimension_widths"].size(); i++) {
     uint64_t width = config["dimension_widths"][i].get<uint64_t>();
-    CHECK_GT(width, 1) << "Mesh width should be more than 1.";
+    CHECK_GT(width, 1) << "Grid width should be more than 1.";
     dimension_sizes_.push_back(width);
   }
   // Extract concentration (number of processors per mesh node) from config
@@ -47,7 +47,7 @@ Mesh2dRingAllReduceTranslator::Mesh2dRingAllReduceTranslator(
   nlohmann::json implicit_config = R"(
     { "algorithm": "bidir-ring" }
   )"_json;
-  // If we have a barrier in 2D Mesh, we need to instanciate a barrier before
+  // If we have a barrier in 2D Grid, we need to instanciate a barrier before
   // all-gather in each dimension
   if (config.find("barrier") != config.end()) {
     implicit_config["barrier"] = config["barrier"];
@@ -60,7 +60,7 @@ Mesh2dRingAllReduceTranslator::Mesh2dRingAllReduceTranslator(
 }
 
 shim::StatusOr<std::unique_ptr<Subroutine>>
-    Mesh2dRingAllReduceTranslator::GetSubroutine(
+    RingOver2dGridAllReduceTranslator::GetSubroutine(
         Subroutine* reduction_subroutine,
         const std::string& name_prefix,
         Instruction* calling_instruction,
@@ -77,7 +77,7 @@ shim::StatusOr<std::unique_ptr<Subroutine>>
       "Processor index points to the wrong Processor ID.";
   std::vector<uint64_t> processor_coordinates;
   std::unordered_set<int64_t> comm_world(comm_group.begin(), comm_group.end());
-  CommunicationGroup full_ring = Swizzling2dMeshToRing(dimension_sizes_,
+  CommunicationGroup full_ring = Swizzling2dGridToRing(dimension_sizes_,
                                                        concentration_);
   CommunicationGroup ring_comm_group;
   // We form new comm group from given comm group in the swizzled ring order
@@ -89,7 +89,7 @@ shim::StatusOr<std::unique_ptr<Subroutine>>
   ASSIGN_OR_RETURN(auto allreduce, Instruction::Create(
       Opcode::kAllReduce,
       absl::StrCat(name_prefix,
-                   "_mesh-2d-ring"),
+                   "_ring-2d-grid"),
       allreduce_sub_ptr,
       /*is_root = */ true));
   allreduce->AppendCommunicationGroup(ring_comm_group);
@@ -103,9 +103,9 @@ shim::StatusOr<std::unique_ptr<Subroutine>>
 }
 
 registerWithObjectFactory(
-    "mesh-2d-ring",
+    "ring-2d-grid",
     AllReduceTranslator,
-    Mesh2dRingAllReduceTranslator,
+    RingOver2dGridAllReduceTranslator,
     nlohmann::json);
 
 }  // namespace paragraph
