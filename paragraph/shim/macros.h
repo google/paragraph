@@ -106,11 +106,12 @@ struct StreamToStatus {
 
 #define CHECK_OK(val)                           \
   do {                                          \
-    if (PREDICT_FALSE(!val.ok())) {             \
+    absl::Status _status = val;                 \
+    if (PREDICT_FALSE(!_status.ok())) {         \
       fprintf(stderr,                           \
               "CHECK failed with Status %s\n",  \
-              val.ToString().c_str());          \
-      CHECK(val.ok());                          \
+              _status.ToString().c_str());      \
+      CHECK(_status.ok());                      \
     }                                           \
   } while (0)
 
