@@ -14,7 +14,6 @@
  */
 #include "paragraph/simulator/simple_sim.h"
 
-#include <iostream>
 #include <memory>
 #include <queue>
 #include <utility>
@@ -109,6 +108,10 @@ void SimpleSim::InstructionFetch() {
   for (Instruction* instruction : scheduler_->GetReadyInstructions()) {
     fetched_instructions_.push(instruction);
   }
+}
+
+double SimpleSim::GetTime() const {
+  return time_;
 }
 
 }  // namespace paragraph

@@ -30,7 +30,7 @@ class Logger {
   // empty string. If non-empty file name is given, Logger opens file to append
   // to it. If it fails, it returns fail status.
   static shim::StatusOr<std::unique_ptr<Logger>> Create(
-      const std::string& filename);
+      const std::string& filename, bool skip_zeros = false);
   ~Logger();
 
   // Write log to CSV file
@@ -39,13 +39,16 @@ class Logger {
  private:
   // Private constructor so we can handle file access errors during Logger
   // creation
-  explicit Logger(const std::string& filename = "");
+  explicit Logger(const std::string& filename = "", bool skip_zeros = false);
 
   // Name of the CSV file to append log to
   std::string filename_;
 
   // output filestream for the log
   std::ofstream log_stream_;
+
+  // Flag that makes logger skipping instruction with zero execution time
+  bool skip_zeros_;
 
   // Checks if Logger file is open and if not tries to open it
   absl::Status OpenFile();

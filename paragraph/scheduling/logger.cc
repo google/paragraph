@@ -26,10 +26,10 @@
 namespace paragraph {
 
 shim::StatusOr<std::unique_ptr<Logger>> Logger::Create(
-    const std::string& filename) {
+    const std::string& filename, bool skip_zeros) {
   RETURN_IF_FALSE(filename != "", absl::InvalidArgumentError) <<
       "Logger needs a non-empty filename to create a log.";
-  auto logger = absl::WrapUnique(new Logger(filename));
+  auto logger = absl::WrapUnique(new Logger(filename, skip_zeros));
   if (filename != "") {
     RETURN_IF_ERROR(logger->OpenFile());
     RETURN_IF_ERROR(logger->InitializeCsv());
@@ -45,6 +45,9 @@ Logger::~Logger() {
 
 absl::Status Logger::LogInstruction(
     const InstructionFsm& instruction_fsm) {
+  if (skip_zeros_ & (instruction_fsm.GetClockTime() == 0)) {
+    return absl::OkStatus();
+  }
   RETURN_IF_ERROR(OpenFile());
   log_stream_ << MakeCsvLine(instruction_fsm) << std::endl;
   if (log_stream_.fail() || log_stream_.bad()) {
@@ -54,8 +57,9 @@ absl::Status Logger::LogInstruction(
   return absl::OkStatus();
 }
 
-Logger::Logger(const std::string& filename)
-    : filename_(filename) {}
+Logger::Logger(const std::string& filename, bool skip_zeros)
+    : filename_(filename),
+      skip_zeros_(skip_zeros) {}
 
 absl::Status Logger::OpenFile() {
   if (!log_stream_.is_open()) {
@@ -73,7 +77,7 @@ absl::Status Logger::OpenFile() {
 absl::Status Logger::InitializeCsv() {
   if (log_stream_.is_open()) {
     log_stream_ << "processor_id,instruction_name,opcode,ready,"
-                << "started,finished,execution";
+                << "started,finished,clock,wall";
     log_stream_ << std::endl;
   } else {
     return absl::InternalError("Can't initialize CSV File '" + filename_ +
@@ -98,8 +102,11 @@ std::string Logger::MakeCsvLine(const InstructionFsm& fsm,
   str_stream << fsm.GetTimeFinished();
   std::string time_finished_str = str_stream.str();
   str_stream.str("");
-  str_stream << fsm.GetExecutionTime();
-  std::string execution_time_str = str_stream.str();
+  str_stream << fsm.GetClockTime();
+  std::string clock_time_str = str_stream.str();
+  str_stream.str("");
+  str_stream << fsm.GetWallTime();
+  std::string wall_time_str = str_stream.str();
   std::string log_entry_str = absl::StrCat(
       fsm.GetInstruction()->GetGraph()->GetProcessorId(), delimiter,
       fsm.GetInstruction()->GetName(), delimiter,
@@ -107,7 +114,8 @@ std::string Logger::MakeCsvLine(const InstructionFsm& fsm,
       time_ready_str, delimiter,
       time_started_str, delimiter,
       time_finished_str, delimiter,
-      execution_time_str);
+      clock_time_str, delimiter,
+      wall_time_str);
   return log_entry_str;
 }
 

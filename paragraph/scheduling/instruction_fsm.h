@@ -84,8 +84,10 @@ class InstructionFsm {
   void SetTimeStarted(double current_time);
   double GetTimeFinished() const;
   void SetTimeFinished(double current_time);
-  double GetExecutionTime() const;
-  void SetExecutionTime(double current_time);
+  double GetClockTime() const;
+  void SetClockTime(double current_time);
+  double GetWallTime() const;
+  void SetWallTime(double current_time);
 
   const Instruction* GetInstruction() const;
 
@@ -104,7 +106,8 @@ class InstructionFsm {
   double time_ready_;
   double time_started_;
   double time_finished_;
-  double execution_time_;
+  double clock_time_;
+  double wall_time_;
 };
 
 }  // namespace paragraph

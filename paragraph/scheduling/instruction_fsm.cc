@@ -62,7 +62,8 @@ InstructionFsm::InstructionFsm(GraphScheduler* scheduler,
       time_ready_(0.0),
       time_started_(0.0),
       time_finished_(0.0),
-      execution_time_(0.0) {}
+      clock_time_(0.0),
+      wall_time_(0.0) {}
 
 bool InstructionFsm::IsUnblockedByOperands() const {
   bool unblocked = true;
@@ -124,19 +125,28 @@ void InstructionFsm::SetTimeFinished(double current_time) {
   time_finished_ = current_time;
 }
 
-double InstructionFsm::GetExecutionTime() const {
-  return execution_time_;
+double InstructionFsm::GetClockTime() const {
+  return clock_time_;
 }
 
-void InstructionFsm::SetExecutionTime(double current_time) {
-  execution_time_ = current_time;
+void InstructionFsm::SetClockTime(double current_time) {
+  clock_time_ = current_time;
+}
+
+double InstructionFsm::GetWallTime() const {
+  return wall_time_;
+}
+
+void InstructionFsm::SetWallTime(double current_time) {
+  wall_time_ = current_time;
 }
 
 void InstructionFsm::Reset() {
   SetTimeReady(0.0);
   SetTimeStarted(0.0);
   SetTimeFinished(0.0);
-  SetExecutionTime(0.0);
+  SetClockTime(0.0);
+  SetWallTime(0.0);
   if (instruction_->Operands().empty()) {
     state_ = State::kReady;
   } else {
@@ -228,7 +238,7 @@ shim::StatusOr<Subroutine*> InstructionFsm::PickSubroutine() {
       // If while wasn't executed yet, meaning its a first iteration, flag it
       // and  set the start time as the start time of the earliest instruction
       // in the loop.
-      bool first_encounter = GetExecutionTime() == 0;
+      bool first_encounter = GetClockTime() == 0;
       double start_time = scheduler_->GetCurrentTime();
       // Increment while execution time every iteration
       for (auto& subroutine : instruction_->InnerSubroutines()) {
@@ -236,8 +246,8 @@ shim::StatusOr<Subroutine*> InstructionFsm::PickSubroutine() {
           start_time = std::min(
               start_time,
               scheduler_->GetFsm(nested_instr.get()).GetTimeStarted());
-          SetExecutionTime(GetExecutionTime() +
-              scheduler_->GetFsm(nested_instr.get()).GetExecutionTime());
+          SetClockTime(GetClockTime() +
+              scheduler_->GetFsm(nested_instr.get()).GetClockTime());
         }
       }
       if (first_encounter) {
@@ -245,6 +255,10 @@ shim::StatusOr<Subroutine*> InstructionFsm::PickSubroutine() {
       }
       scheduler_->GetFsm(body_subroutine).Reset(false);
       scheduler_->GetFsm(condition_subroutine).Reset(false);
+    } else if (scheduler_->GetFsm(body_subroutine).IsFinished() &&
+        scheduler_->GetFsm(condition_subroutine).IsFinished() &&
+        scheduler_->GetFsm(condition_subroutine).GetExecutionCount() == 0) {
+      SetWallTime(scheduler_->GetCurrentTime() - GetTimeStarted());
     }
     if (!scheduler_->GetFsm(body_subroutine).IsFinished()) {
       picked_subroutine = body_subroutine;

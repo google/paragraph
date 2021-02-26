@@ -68,6 +68,9 @@ class SimpleSim {
   // simulation time, a single instrction at a time
   absl::Status FetchAndExecute();
 
+  // Returns internal simulation timer in seconds
+  double GetTime() const;
+
  private:
   // Private constructor that is used by Create factory
   explicit SimpleSim(const PerformanceParameters& processor_parameters);

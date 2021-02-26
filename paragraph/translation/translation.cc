@@ -15,6 +15,7 @@
 #include "paragraph/translation/translation.h"
 
 #include <algorithm>
+#include <iostream>
 #include <memory>
 #include <utility>
 
@@ -59,9 +60,11 @@ shim::StatusOr<std::vector<std::unique_ptr<Graph>>> IndividualizeAndTranslate(
 
   // Create individualized graphs and translate them
   for (int64_t processor : processor_ids) {
+    std::cout << "Processing graph for processor " << processor << std::endl;
     ASSIGN_OR_RETURN(std::unique_ptr<Graph> individualized_graph,
                      composite_graph->Individualize(processor));
     // Collective translation
+    std::cout << "\tIndividualized graph." << std::endl;
     for (auto& subroutine : individualized_graph->Subroutines()) {
       for (auto& instruction : subroutine->Instructions()) {
         if (collective_translators.find(OpcodeToString(
@@ -71,6 +74,7 @@ shim::StatusOr<std::vector<std::unique_ptr<Graph>>> IndividualizeAndTranslate(
         }
       }
     }
+    std::cout << "\tTranslated collectives." << std::endl;
     // Protocol translation
     for (auto& subroutine : individualized_graph->Subroutines()) {
       for (auto& instruction : subroutine->Instructions()) {
@@ -81,6 +85,8 @@ shim::StatusOr<std::vector<std::unique_ptr<Graph>>> IndividualizeAndTranslate(
         }
       }
     }
+    std::cout << "\tTranslated protocol level communications."
+              << std::endl;
     // Communication tags
     individualized_graph->ApplyCommunicationTags();
 

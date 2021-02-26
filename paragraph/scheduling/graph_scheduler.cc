@@ -96,8 +96,10 @@ void GraphScheduler::InstructionFinished(
   GetFsm(instruction).SetFinished();
   GetFsm(instruction).SetTimeFinished(current_time);
   if (instruction->InnerSubroutines().empty()) {
-    GetFsm(instruction).SetExecutionTime(current_time -
-                                         GetFsm(instruction).GetTimeStarted());
+    GetFsm(instruction).SetClockTime(current_time -
+                                     GetFsm(instruction).GetTimeStarted());
+    GetFsm(instruction).SetWallTime(current_time -
+                                    GetFsm(instruction).GetTimeStarted());
   }
   // When we finish instruction that has inner subroutines, we need to find
   // when the first instruction in inner subroutines has started. That marks the
@@ -111,15 +113,16 @@ void GraphScheduler::InstructionFinished(
       for (auto& nested_instr : subroutine->Instructions()) {
         start_time = std::min(start_time,
                               GetFsm(nested_instr.get()).GetTimeStarted());
-        GetFsm(instruction).SetExecutionTime(
-            GetFsm(instruction).GetExecutionTime() +
-            GetFsm(nested_instr.get()).GetExecutionTime());
+        GetFsm(instruction).SetClockTime(
+            GetFsm(instruction).GetClockTime() +
+            GetFsm(nested_instr.get()).GetClockTime());
       }
     }
     // We consider while instruction separately as we need to set start timer
     // only once and not set it every loop iteration
     if (instruction->GetOpcode() != Opcode::kWhile) {
       GetFsm(instruction).SetTimeStarted(start_time);
+      GetFsm(instruction).SetWallTime(current_time - start_time);
     }
   }
   // Log instruction
