@@ -19,6 +19,7 @@
 #include <queue>
 #include <utility>
 
+#include "absl/container/flat_hash_map.h"
 #include "paragraph/graph/graph.h"
 #include "paragraph/scheduling/graph_scheduler.h"
 #include "paragraph/scheduling/logger.h"
@@ -69,7 +70,7 @@ class SimpleSim {
   absl::Status FetchAndExecute();
 
   // Returns internal simulation timer in seconds
-  double GetTime() const;
+  double GetProcessorTime() const;
 
  private:
   // Private constructor that is used by Create factory
@@ -83,7 +84,9 @@ class SimpleSim {
   std::unique_ptr<Graph> graph_;
 
   // Simulator time
-  double time_;
+  double processor_time_;
+  absl::flat_hash_map<int64_t, double> rx_link_time_;
+  absl::flat_hash_map<int64_t, double> tx_link_time_;
 
   // Performance parameters of simulated system, such as FLOPs, Mem BW, Net BW
   PerformanceParameters processor_parameters_;

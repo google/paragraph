@@ -82,6 +82,6 @@ int32_t main(int32_t argc, char** argv) {
             << std::endl;
   CHECK_OK(sim->StartSimulation(0.0));
   std::cout << "Exiting simlator. Simulation is finished at simulation time "
-            << sim->GetTime() << std::endl;
+            << sim->GetProcessorTime() << std::endl;
   return 0;
 }
