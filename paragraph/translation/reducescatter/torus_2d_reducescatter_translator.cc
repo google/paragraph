@@ -89,9 +89,16 @@ shim::StatusOr<std::unique_ptr<Subroutine>>
   // We prepare communication sizes for each stage and each dimension as
   // dimension and/or communication groups could be uneven
   for (size_t dim = 0; dim < dimension_sizes_.size(); dim++) {
-    stage_comm_sizes.push_back(comm_size / comm_group.size());
-    if (integrated_local_exchange_) {
-      stage_comm_sizes.at(dim) *= local_comm_group.size();
+    if ((comm_size == 0) || (comm_group.empty())) {
+      stage_comm_sizes.push_back(0);
+    } else {
+      stage_comm_sizes.push_back(
+          comm_size / comm_group.size() / dimension_sizes_.size());
+      if (integrated_local_exchange_) {
+        // Additionally accomodating split of traffic from concentrator among
+        // dimensions
+        stage_comm_sizes.at(dim) /= dimension_sizes_.size();
+      }
     }
   }
   // We have as many stages as dimensions in the Torus
@@ -106,9 +113,6 @@ shim::StatusOr<std::unique_ptr<Subroutine>>
       // On the first stage we only exchange data laying in the 1st dimension
       // On the second stage we exchange data from both 1st and 2nd dimensions
       stage_comm_sizes.at(dim) *= new_comm_group.size();
-      if (integrated_local_exchange_) {
-        stage_comm_sizes.at(dim) /= local_comm_group.size();
-      }
       // If we don't have any communication in original comm_group within the
       // current dimension, just leave it
       if (new_comm_group.size() > 1) {
@@ -123,8 +127,10 @@ shim::StatusOr<std::unique_ptr<Subroutine>>
         }
         ASSIGN_OR_RETURN(auto reduction_subroutine_stage,
                          reduction_subroutine->Clone("", /*reset_ids*/ false));
-        reduction_subroutine_stage->ScalePerformance(
-            1.0 * stage_comm_sizes.at(dim) / comm_size);
+        if ((comm_size != 0) && (stage_comm_sizes.at(dim) != 0)) {
+          reduction_subroutine_stage->ScalePerformance(
+              1.0 * stage_comm_sizes.at(dim) / comm_size);
+        }
         reducescatter_stage->AppendInnerSubroutine(std::move(
             reduction_subroutine_stage));
         RETURN_IF_ERROR(reducescatter_translator_->Translate(
