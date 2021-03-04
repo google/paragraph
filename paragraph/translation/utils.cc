@@ -15,6 +15,7 @@
 #include "paragraph/translation/utils.h"
 
 #include <vector>
+#include <unordered_set>
 
 namespace paragraph {
 
@@ -43,6 +44,67 @@ uint64_t GridCoordinatesToConsecutiveProcessorId(
     step *= dimension_sizes.at(index - 1);
   }
   return processor_id;
+}
+
+CommunicationGroup CommunicationGroupLocalProjection(
+    int64_t processor_id,
+    const CommunicationGroup& comm_group,
+    const std::vector<uint64_t>& dimension_sizes,
+    uint64_t concentration) {
+  std::vector<uint64_t> processor_coordinates;
+  std::unordered_set<int64_t> whole_world(comm_group.begin(), comm_group.end());
+  // Check if we have non-trivial concentration first and need to perform
+  // explicit local exchange step
+  CommunicationGroup new_comm_group;
+  if ((concentration > 1)) {
+    processor_coordinates = ConsecutiveProcessorIdToGridCoordinates(
+        processor_id, dimension_sizes, concentration);
+    for (uint64_t i = 0; i < concentration; i++) {
+      processor_coordinates.at(0) = i;
+      uint64_t new_processor_id = GridCoordinatesToConsecutiveProcessorId(
+          processor_coordinates, dimension_sizes, concentration);
+      if (whole_world.find(new_processor_id) != whole_world.end()) {
+        new_comm_group.push_back(new_processor_id);
+      }
+    }
+  }
+  return new_comm_group;
+}
+
+CommunicationGroup CommunicationGroupProjectionOnGrid(
+    int64_t processor_id,
+    const CommunicationGroup& comm_group,
+    size_t dimension,
+    bool include_concentrators,
+    const std::vector<uint64_t>& dimension_sizes,
+    uint64_t concentration) {
+  std::vector<uint64_t> processor_coordinates =
+      ConsecutiveProcessorIdToGridCoordinates(processor_id,
+                                              dimension_sizes,
+                                              concentration);
+  std::unordered_set<int64_t> whole_world(comm_group.begin(), comm_group.end());
+  CommunicationGroup new_comm_group;
+  uint64_t dim_width = dimension_sizes.at(dimension);
+  for (uint64_t i = 0; i < dim_width; i++) {
+    processor_coordinates.at(dimension + 1) = i;
+    if (include_concentrators) {
+      for (uint64_t j = 0; j < concentration; j++) {
+        processor_coordinates.at(0) = j;
+        uint64_t new_processor_id = GridCoordinatesToConsecutiveProcessorId(
+            processor_coordinates, dimension_sizes, concentration);
+        if (whole_world.find(new_processor_id) != whole_world.end()) {
+          new_comm_group.push_back(new_processor_id);
+        }
+      }
+    } else {
+      uint64_t new_processor_id = GridCoordinatesToConsecutiveProcessorId(
+          processor_coordinates, dimension_sizes, concentration);
+      if (whole_world.find(new_processor_id) != whole_world.end()) {
+        new_comm_group.push_back(new_processor_id);
+      }
+    }
+  }
+  return new_comm_group;
 }
 
 CommunicationGroup Swizzling2dGridToRing(

@@ -55,6 +55,8 @@ class Torus2dAllGatherTranslator : public AllGatherTranslator {
   std::vector<uint64_t> dimension_sizes_;
   // Number of processors per torus node
   uint64_t concentration_;
+  // concentrators
+  bool integrated_local_exchange_;
 };
 
 }  // namespace paragraph

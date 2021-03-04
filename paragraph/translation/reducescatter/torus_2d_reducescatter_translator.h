@@ -56,6 +56,8 @@ class Torus2dReduceScatterTranslator : public ReduceScatterTranslator {
   std::vector<uint64_t> dimension_sizes_;
   // Number of processors per torus node
   uint64_t concentration_;
+  // concentrators
+  bool integrated_local_exchange_;
 };
 
 }  // namespace paragraph
