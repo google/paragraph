@@ -25,7 +25,7 @@
 #include "paragraph/translation/translation_map.h"
 
 // Tests expanding dissemination all-reduce
-TEST(DisseminationAllReduce, All) {
+TEST(DisseminationAllReduce, Three) {
   auto graph = absl::make_unique<paragraph::Graph>("test_graph", 2);
   auto sub = absl::make_unique<paragraph::Subroutine>(
       "test_subroutine", graph.get());
@@ -183,6 +183,216 @@ inner_subroutines {
       )proto";
   google::protobuf::TextFormat::ParseFromString(allreduce_str,
                                                 &allreduce_proto);
+  EXPECT_TRUE(google::protobuf::util::MessageDifferencer::Equals(
+      allreduce->ToProto().value(), allreduce_proto));
+}
+
+// Tests expanding dissemination all-reduce
+TEST(DisseminationAllReduce, Five) {
+  auto graph = absl::make_unique<paragraph::Graph>("test_graph", 2);
+  auto sub = absl::make_unique<paragraph::Subroutine>(
+      "test_subroutine", graph.get());
+  auto sub_ptr = sub.get();
+  sub_ptr->SetId(3);
+  graph->SetEntrySubroutine(std::move(sub));
+
+  ASSERT_OK_AND_ASSIGN(auto instr_1, paragraph::Instruction::Create(
+      paragraph::Opcode::kDelay, "first_instruction", sub_ptr));
+  instr_1->SetOps(4);
+
+  ASSERT_OK_AND_ASSIGN(auto allreduce, paragraph::Instruction::Create(
+      paragraph::Opcode::kAllReduce, "all-reduce", sub_ptr));
+  allreduce->SetBytesOut(48);
+  paragraph::CommunicationGroup allreduce_group = {0, 1, 2, 3, 4};
+  allreduce->AppendCommunicationGroup(allreduce_group);
+
+  auto reduction_sub = absl::make_unique<paragraph::Subroutine>(
+      "reduction_subroutine", graph.get());
+  auto reduction_ptr = reduction_sub.get();
+  ASSERT_OK_AND_ASSIGN(auto op1, paragraph::Instruction::Create(
+      paragraph::Opcode::kDelay, "op1", reduction_ptr));
+  op1->SetBytesOut(48);
+  ASSERT_OK_AND_ASSIGN(auto op2, paragraph::Instruction::Create(
+      paragraph::Opcode::kDelay, "op2", reduction_ptr));
+  op2->SetBytesOut(48);
+  ASSERT_OK_AND_ASSIGN(auto sum_op, paragraph::Instruction::Create(
+      paragraph::Opcode::kDelay, "sum", reduction_ptr, true));
+  sum_op->SetOps(96);
+  sum_op->AddOperand(op1);
+  sum_op->AddOperand(op2);
+  allreduce->AppendInnerSubroutine(std::move(reduction_sub));
+
+  ASSERT_OK_AND_ASSIGN(auto instr_3, paragraph::Instruction::Create(
+      paragraph::Opcode::kDelay, "last_instruction", sub_ptr, true));
+  instr_3->SetOps(4);
+
+  nlohmann::json config = R"(
+    {
+      "all-reduce": {
+        "algorithm": "dissemination"
+      }
+    }
+  )"_json;
+
+  ASSERT_OK_AND_ASSIGN(auto translators, paragraph::CreateTranslators(
+      paragraph::TranslatorType::kCollective, config));
+  EXPECT_OK(translators["all-reduce"]->Translate(allreduce));
+
+  paragraph::InstructionProto allreduce_proto;
+  std::string allreduce_str =
+      R"proto(
+name: "all-reduce"
+opcode: "all-reduce"
+instruction_id: 2
+bytes_out: 48
+communication_groups {
+  group_ids: 0
+  group_ids: 1
+  group_ids: 2
+  group_ids: 3
+  group_ids: 4
+}
+inner_subroutines {
+  name: "all-reduce_dissemination"
+  subroutine_root_id: 18
+  execution_probability: 1
+  execution_count: 1
+  instructions {
+    name: "all-reduce_dissemination_sendrecv_0"
+    opcode: "sendrecv"
+    instruction_id: 7
+    bytes_in: 48
+    bytes_out: 48
+    communication_groups {
+      group_ids: 3
+      group_ids: 1
+    }
+  }
+  instructions {
+    name: "all-reduce_dissemination_reduction_0"
+    opcode: "call"
+    instruction_id: 8
+    operand_ids: 7
+    inner_subroutines {
+      name: "reduction_subroutine_iteration_0"
+      subroutine_root_id: 11
+      execution_probability: 1
+      execution_count: 1
+      instructions {
+        name: "op1_iteration_0"
+        opcode: "delay"
+        instruction_id: 9
+        bytes_out: 48
+      }
+      instructions {
+        name: "op2_iteration_0"
+        opcode: "delay"
+        instruction_id: 10
+        bytes_out: 48
+      }
+      instructions {
+        name: "sum_iteration_0"
+        opcode: "delay"
+        instruction_id: 11
+        ops: 96
+        operand_ids: 9
+        operand_ids: 10
+      }
+    }
+  }
+  instructions {
+    name: "all-reduce_dissemination_sendrecv_1"
+    opcode: "sendrecv"
+    instruction_id: 12
+    bytes_in: 48
+    bytes_out: 48
+    communication_groups {
+      group_ids: 4
+      group_ids: 0
+    }
+    operand_ids: 8
+  }
+  instructions {
+    name: "all-reduce_dissemination_reduction_1"
+    opcode: "call"
+    instruction_id: 13
+    operand_ids: 12
+    inner_subroutines {
+      name: "reduction_subroutine_iteration_1"
+      subroutine_root_id: 16
+      execution_probability: 1
+      execution_count: 1
+      instructions {
+        name: "op1_iteration_1"
+        opcode: "delay"
+        instruction_id: 14
+        bytes_out: 48
+      }
+      instructions {
+        name: "op2_iteration_1"
+        opcode: "delay"
+        instruction_id: 15
+        bytes_out: 48
+      }
+      instructions {
+        name: "sum_iteration_1"
+        opcode: "delay"
+        instruction_id: 16
+        ops: 96
+        operand_ids: 14
+        operand_ids: 15
+      }
+    }
+  }
+  instructions {
+    name: "all-reduce_dissemination_sendrecv_2"
+    opcode: "sendrecv"
+    instruction_id: 17
+    bytes_in: 48
+    bytes_out: 48
+    communication_groups {
+      group_ids: 1
+      group_ids: 3
+    }
+    operand_ids: 13
+  }
+  instructions {
+    name: "all-reduce_dissemination_reduction_2"
+    opcode: "call"
+    instruction_id: 18
+    operand_ids: 17
+    inner_subroutines {
+      name: "reduction_subroutine_iteration_2"
+      subroutine_root_id: 21
+      execution_probability: 1
+      execution_count: 1
+      instructions {
+        name: "op1_iteration_2"
+        opcode: "delay"
+        instruction_id: 19
+        bytes_out: 48
+      }
+      instructions {
+        name: "op2_iteration_2"
+        opcode: "delay"
+        instruction_id: 20
+        bytes_out: 48
+      }
+      instructions {
+        name: "sum_iteration_2"
+        opcode: "delay"
+        instruction_id: 21
+        ops: 96
+        operand_ids: 19
+        operand_ids: 20
+      }
+    }
+  }
+}
+      )proto";
+  google::protobuf::TextFormat::ParseFromString(allreduce_str,
+                                                &allreduce_proto);
+  graph->WriteToFile("/tmp/graph.textproto");
   EXPECT_TRUE(google::protobuf::util::MessageDifferencer::Equals(
       allreduce->ToProto().value(), allreduce_proto));
 }
