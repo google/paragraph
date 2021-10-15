@@ -24,6 +24,7 @@ cc_library(
     name = "allreduce",
     srcs = [
         "bidir_ring_allreduce_translator.cc",
+        "dissemination_allreduce_translator.cc",
         "mesh_1d_allreduce_translator.cc",
         "mesh_2d_allreduce_translator.cc",
         "ring_over_2d_grid_allreduce_translator.cc",
@@ -32,6 +33,7 @@ cc_library(
     ],
     hdrs = [
         "bidir_ring_allreduce_translator.h",
+        "dissemination_allreduce_translator.h",
         "mesh_1d_allreduce_translator.h",
         "mesh_2d_allreduce_translator.h",
         "ring_over_2d_grid_allreduce_translator.h",
@@ -62,6 +64,7 @@ cc_test(
     size = "small",
     srcs = [
         "bidir_ring_allreduce_translator_test.cc",
+        "dissemination_allreduce_translator_test.cc",
         "mesh_1d_allreduce_translator_test.cc",
         "mesh_2d_allreduce_translator_test.cc",
         "ring_over_2d_grid_allreduce_translator_test.cc",

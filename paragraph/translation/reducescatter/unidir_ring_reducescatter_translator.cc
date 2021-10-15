@@ -102,7 +102,7 @@ shim::StatusOr<std::unique_ptr<Subroutine>>
     reduction->AddOperand(sendrecv);
     previous_instruction = reduction;
   }
-  // Set root instruction for allgather subroutine
+  // Set root instruction for reducescatter subroutine
   RETURN_IF_ERROR(reducescatter_subroutine->SetRootInstruction(
       previous_instruction));
   return reducescatter_subroutine;
