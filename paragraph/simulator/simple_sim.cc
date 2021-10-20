@@ -26,9 +26,9 @@ namespace paragraph {
 
 shim::StatusOr<std::unique_ptr<SimpleSim>> SimpleSim::Create(
     std::unique_ptr<Graph> graph,
-    const PerformanceParameters& processor_parameters,
+    const PerformanceParameters& performance_parameters,
     std::unique_ptr<Logger> logger) {
-  auto simulator = absl::WrapUnique(new SimpleSim(processor_parameters));
+  auto simulator = absl::WrapUnique(new SimpleSim(performance_parameters));
   simulator->graph_ = std::move(graph);
   ASSIGN_OR_RETURN(simulator->scheduler_,
                    GraphScheduler::Create(simulator->graph_.get(),
@@ -36,9 +36,11 @@ shim::StatusOr<std::unique_ptr<SimpleSim>> SimpleSim::Create(
   return simulator;
 }
 
-absl::Status SimpleSim::StartSimulation(double start_time) {
-  time_ = start_time;
-  RETURN_IF_ERROR(scheduler_->Initialize(time_));
+absl::Status SimpleSim::Simulate(double start_time) {
+  processor_time_ = start_time;
+  nic_tx_time_ = start_time;
+  nic_rx_time_ = start_time;
+  RETURN_IF_ERROR(scheduler_->Initialize(start_time));
   RETURN_IF_ERROR(FetchAndExecute());
   return absl::OkStatus();
 }
@@ -48,7 +50,6 @@ absl::Status SimpleSim::FetchAndExecute() {
   while (!fetched_instructions_.empty()) {
     Instruction* executing_instruction = fetched_instructions_.front();
     fetched_instructions_.pop();
-    scheduler_->InstructionStarted(executing_instruction, time_);
     Opcode opcode = executing_instruction->GetOpcode();
     RETURN_IF_TRUE(OpcodeIsCollectiveCommunication(opcode),
                     absl::InternalError) << "Bad opcode "
@@ -69,22 +70,43 @@ absl::Status SimpleSim::FetchAndExecute() {
     if (OpcodeIsGeneralPurpose(opcode)) {
       // We expect performance model from the graph source already populated
       // the 'seconds' member in the instruction in the corresponding bridge
-      time_ += executing_instruction->GetSeconds();
-      scheduler_->InstructionFinished(executing_instruction, time_);
-    } else if (opcode == Opcode::kSendStart) {
-      // We take into account network delay only for SendStart instructions
-      time_ += executing_instruction->GetBytesIn() /
-          processor_parameters_.network_bandwidth_;
-      scheduler_->InstructionFinished(executing_instruction, time_);
+      double current_time = std::max(
+          scheduler_->GetFsm(executing_instruction).GetTimeReady(),
+          processor_time_);
+      scheduler_->InstructionStarted(executing_instruction, current_time);
+      current_time += executing_instruction->GetSeconds();
+      scheduler_->InstructionFinished(executing_instruction, current_time);
+      processor_time_ = current_time;
+    } else if ((opcode == Opcode::kSendStart) ||
+               (opcode == Opcode::kSendDone)) {
+      double current_time = std::max(
+          scheduler_->GetFsm(executing_instruction).GetTimeReady(),
+          nic_tx_time_);
+      scheduler_->InstructionStarted(executing_instruction, current_time);
+      if (opcode == Opcode::kSendStart) {
+        // We take into account network delay on tx_link between current
+        // processor and its peer for SendStart instructions, while we model
+        // SendDone as instant
+        current_time += executing_instruction->GetBytesIn() /
+            performance_parameters_.network_bandwidth_;
+      }
+      scheduler_->InstructionFinished(executing_instruction, current_time);
+      nic_tx_time_ = current_time;
     } else if ((opcode == Opcode::kRecvStart) ||
-               (opcode == Opcode::kSendDone) ||
                (opcode == Opcode::kRecvDone)) {
-      // We model SendDone and RecvStart as instant so network instructions
-      // don't block execution unless there is a packet transfer.
-      // We model RecvDone to be instant as we expect that data already was
-      // transfered, and to avoid accounting network delay twice for SendStart
-      // and RecvDone corresponding to the same communication
-      scheduler_->InstructionFinished(executing_instruction, time_);
+      double current_time = std::max(
+          scheduler_->GetFsm(executing_instruction).GetTimeReady(),
+          nic_rx_time_);
+      scheduler_->InstructionStarted(executing_instruction, current_time);
+      if (opcode == Opcode::kRecvDone) {
+        // We take into account network delay on rx_link between current
+        // processor and its peer for RecvDone instructions. We model RecvStart
+        // as instant, as we believe that all memory is allocated a priori
+        current_time += executing_instruction->GetBytesOut() /
+            performance_parameters_.network_bandwidth_;
+      }
+      scheduler_->InstructionFinished(executing_instruction, current_time);
+      nic_rx_time_ = current_time;
     } else if (OpcodeIsCollectiveCommunication(opcode) ||
                OpcodeIsIndividualCommunication(opcode) ||
                OpcodeIsProtocolLevelCommunication(opcode) ||
@@ -99,9 +121,11 @@ absl::Status SimpleSim::FetchAndExecute() {
   return absl::OkStatus();
 }
 
-SimpleSim::SimpleSim(const PerformanceParameters& processor_parameters)
-  : time_(0),
-    processor_parameters_(processor_parameters) {}
+SimpleSim::SimpleSim(const PerformanceParameters& performance_parameters)
+  : processor_time_(0),
+    nic_tx_time_(0),
+    nic_rx_time_(0),
+    performance_parameters_(performance_parameters) {}
 
 void SimpleSim::InstructionFetch() {
   // Fetches all available instructions from the scheduler
@@ -110,8 +134,16 @@ void SimpleSim::InstructionFetch() {
   }
 }
 
-double SimpleSim::GetTime() const {
-  return time_;
+double SimpleSim::GetProcessorTime() const {
+  return processor_time_;
+}
+
+double SimpleSim::GetNicTxTime() const {
+  return nic_tx_time_;
+}
+
+double SimpleSim::GetNicRxTime() const {
+  return nic_rx_time_;
 }
 
 }  // namespace paragraph

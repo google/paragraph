@@ -19,6 +19,7 @@
 #include <queue>
 #include <utility>
 
+#include "absl/container/flat_hash_map.h"
 #include "paragraph/graph/graph.h"
 #include "paragraph/scheduling/graph_scheduler.h"
 #include "paragraph/scheduling/logger.h"
@@ -56,24 +57,26 @@ class SimpleSim {
   // and provides it a logger if it was created
   static shim::StatusOr<std::unique_ptr<SimpleSim>> Create(
       std::unique_ptr<Graph> graph,
-      const PerformanceParameters& processor_parameters,
+      const PerformanceParameters& performance_parameters,
       std::unique_ptr<Logger> logger = nullptr);
 
   // Starts simulation at a given time. Simulation fetches instructions
   // immediately and is going to finish only when there are no new instructions
   // to fetch, and no instructions are left to execute
-  absl::Status StartSimulation(double start_time = 0);
+  absl::Status Simulate(double start_time = 0);
 
   // Fetches instructions from the scheduler and executes it incrementing
   // simulation time, a single instrction at a time
   absl::Status FetchAndExecute();
 
   // Returns internal simulation timer in seconds
-  double GetTime() const;
+  double GetProcessorTime() const;
+  double GetNicTxTime() const;
+  double GetNicRxTime() const;
 
  private:
   // Private constructor that is used by Create factory
-  explicit SimpleSim(const PerformanceParameters& processor_parameters);
+  explicit SimpleSim(const PerformanceParameters& performance_parameters);
 
   // Helper function that fetches a single instruction from
   // 'fetched_instructions_' but does not execute it
@@ -82,11 +85,17 @@ class SimpleSim {
   // Graph that's going to be simulated
   std::unique_ptr<Graph> graph_;
 
-  // Simulator time
-  double time_;
+  // Simulator time. We separately model processor time for non-communicaation
+  // instruction and NIC time.
+  // Processor can execute single non-communication instruction at every time,
+  // NIC can provide full injection bandwidth to a single communication
+  // instruction at every time.
+  double processor_time_;
+  double nic_tx_time_;
+  double nic_rx_time_;
 
   // Performance parameters of simulated system, such as FLOPs, Mem BW, Net BW
-  PerformanceParameters processor_parameters_;
+  PerformanceParameters performance_parameters_;
 
   // Scheduler for the graph that provides instructions to fetch
   std::unique_ptr<GraphScheduler> scheduler_;

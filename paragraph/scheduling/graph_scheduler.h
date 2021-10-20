@@ -91,7 +91,11 @@ class GraphScheduler {
   Graph* graph_;
 
   // Current simulation time set and updated by simulator every time when public
-  // API is used.
+  // API is used. There is no implicit assumption that current time should only
+  // increase, as with concurrent instruction execution we potentially can fetch
+  // and start executing instruction that became available for execution earlier
+  // that the `current_time`, i.e. if we have independent instructions branches
+  // in the graph.
   double current_time_;
 
   // Flag that checks if scheduler was initialized with start time

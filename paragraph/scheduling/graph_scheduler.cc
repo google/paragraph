@@ -83,7 +83,6 @@ void GraphScheduler::SetLogger(std::unique_ptr<Logger> logger) {
 void GraphScheduler::InstructionStarted(
     Instruction* instruction, double current_time) {
   CHECK(initialized_);
-  CHECK_LE(current_time_, current_time);
   current_time_ = current_time;
   GetFsm(instruction).SetTimeStarted(current_time);
   GetFsm(instruction).SetExecuting();
@@ -91,7 +90,6 @@ void GraphScheduler::InstructionStarted(
 
 void GraphScheduler::InstructionFinished(
     Instruction* instruction, double current_time) {
-  CHECK_LE(current_time_, current_time);
   current_time_ = current_time;
   GetFsm(instruction).SetFinished();
   GetFsm(instruction).SetTimeFinished(current_time);
