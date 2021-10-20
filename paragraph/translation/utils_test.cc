@@ -53,6 +53,37 @@ TEST(TranslationUtils, GridCoordinatesToConsecutiveProcessorId) {
             22);
 }
 
+// Tests Communication group intersection with local processors
+TEST(TranslationUtils, CommunicationGroupLocalProjection) {
+  uint64_t concentration = 2;
+  std::vector<uint64_t> dimension_sizes = {4, 3};
+  paragraph::CommunicationGroup comm_group = {0, 1, 2, 3, 4, 5, 11, 12};
+  paragraph::CommunicationGroup test_group = {2, 3};
+  EXPECT_EQ(paragraph::CommunicationGroupLocalProjection(
+      3, comm_group, dimension_sizes, concentration),
+            test_group);
+  paragraph::CommunicationGroup test_group_2;
+  EXPECT_EQ(paragraph::CommunicationGroupLocalProjection(
+      3, {0, 1}, dimension_sizes, concentration),
+            test_group_2);
+}
+
+// Tests Communication group intersection with processors in particular
+// dimensions
+TEST(TranslationUtils, CommunicationGroupProjectionOnGrid) {
+  uint64_t concentration = 2;
+  std::vector<uint64_t> dimension_sizes = {2, 3};
+  paragraph::CommunicationGroup comm_group = {0, 1, 2, 3, 4, 5, 10, 11};
+  paragraph::CommunicationGroup test_group = {2, 3, 10, 11};
+  EXPECT_EQ(paragraph::CommunicationGroupProjectionOnGrid(
+      3, comm_group, 1, true, dimension_sizes, concentration),
+            test_group);
+  paragraph::CommunicationGroup test_group_2 = {1, 3};
+  EXPECT_EQ(paragraph::CommunicationGroupProjectionOnGrid(
+      1, comm_group, 0, false, dimension_sizes, concentration),
+            test_group_2);
+}
+
 // Tests 2d swizzling to map 2D grid on a logical ring
 TEST(TranslationUtils, Swizzling2dGridToRing) {
   uint64_t concentration = 2;

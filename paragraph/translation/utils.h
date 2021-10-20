@@ -33,6 +33,20 @@ uint64_t GridCoordinatesToConsecutiveProcessorId(
     const std::vector<uint64_t>& dimension_sizes,
     uint64_t concentration);
 
+CommunicationGroup CommunicationGroupLocalProjection(
+    int64_t processor_id,
+    const CommunicationGroup& comm_group,
+    const std::vector<uint64_t>& dimension_sizes,
+    uint64_t concentration);
+
+CommunicationGroup CommunicationGroupProjectionOnGrid(
+    int64_t processor_id,
+    const CommunicationGroup& comm_group,
+    size_t dimension,
+    bool include_concentrators,
+    const std::vector<uint64_t>& dimension_sizes,
+    uint64_t concentration);
+
 // 2D swizzling algorithm that produces Hamiltonian cycle through  all the
 // vertices of 2D Grid, such as Mesh or Torus. It is used to map these
 // topologies onto logical ring topology. This is not the optimal algorithm as

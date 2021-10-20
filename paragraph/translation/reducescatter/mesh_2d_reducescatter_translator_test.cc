@@ -24,6 +24,780 @@
 #include "paragraph/shim/test_macros.h"
 #include "paragraph/translation/translation_map.h"
 
+paragraph::InstructionProto Mesh2dReduceScatter_no_barrier_test_proto() {
+  paragraph::InstructionProto proto;
+  std::string test_str =
+      R"proto(
+name: "reduce-scatter"
+opcode: "reduce-scatter"
+instruction_id: 2
+bytes_out: 80
+communication_groups {
+  group_ids: 0
+  group_ids: 1
+  group_ids: 2
+  group_ids: 3
+  group_ids: 4
+  group_ids: 5
+  group_ids: 6
+  group_ids: 7
+}
+inner_subroutines {
+  name: "reduce-scatter_mesh-2d"
+  subroutine_root_id: 88
+  execution_probability: 1
+  execution_count: 1
+  instructions {
+    name: "reduce-scatter_stage-0_dim-0"
+    opcode: "reduce-scatter"
+    instruction_id: 7
+    bytes_out: 40
+    communication_groups {
+      group_ids: 0
+      group_ids: 1
+      group_ids: 2
+      group_ids: 3
+    }
+    inner_subroutines {
+      name: "reduce-scatter_stage-0_dim-0_mesh-1d"
+      subroutine_root_id: 26
+      execution_probability: 1
+      execution_count: 1
+      instructions {
+        name: "reduce-scatter_stage-0_dim-0_mesh-1d_ccw_sendrecv_0"
+        opcode: "sendrecv"
+        instruction_id: 8
+        bytes_in: 10
+        bytes_out: 10
+        communication_groups {
+          group_ids: 0
+          group_ids: 0
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-0_mesh-1d_ccw_reduction_0"
+        opcode: "call"
+        instruction_id: 9
+        operand_ids: 8
+        inner_subroutines {
+          name: "reduction_subroutine_ccw_phase_0"
+          subroutine_root_id: 12
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "op1_ccw_phase_0"
+            opcode: "delay"
+            instruction_id: 10
+            bytes_out: 10
+          }
+          instructions {
+            name: "op2_ccw_phase_0"
+            opcode: "delay"
+            instruction_id: 11
+            bytes_out: 10
+          }
+          instructions {
+            name: "sum_ccw_phase_0"
+            opcode: "delay"
+            instruction_id: 12
+            ops: 20
+            operand_ids: 10
+            operand_ids: 11
+          }
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-0_mesh-1d_cw_sendrecv_0"
+        opcode: "sendrecv"
+        instruction_id: 13
+        bytes_in: 10
+        bytes_out: 10
+        communication_groups {
+          group_ids: 2
+          group_ids: 2
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-0_mesh-1d_cw_reduction_0"
+        opcode: "call"
+        instruction_id: 14
+        operand_ids: 13
+        inner_subroutines {
+          name: "reduction_subroutine_cw_phase_0"
+          subroutine_root_id: 17
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "op1_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 15
+            bytes_out: 10
+          }
+          instructions {
+            name: "op2_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 16
+            bytes_out: 10
+          }
+          instructions {
+            name: "sum_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 17
+            ops: 20
+            operand_ids: 15
+            operand_ids: 16
+          }
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-0_mesh-1d_root_0"
+        opcode: "null"
+        instruction_id: 18
+        operand_ids: 14
+        operand_ids: 9
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-0_mesh-1d_ccw_send_1"
+        opcode: "send"
+        instruction_id: 19
+        bytes_out: 10
+        communication_groups {
+          group_ids: 0
+        }
+        operand_ids: 18
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-0_mesh-1d_cw_sendrecv_1"
+        opcode: "sendrecv"
+        instruction_id: 20
+        bytes_in: 10
+        bytes_out: 10
+        communication_groups {
+          group_ids: 2
+          group_ids: 2
+        }
+        operand_ids: 18
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-0_mesh-1d_cw_reduction_1"
+        opcode: "call"
+        instruction_id: 21
+        operand_ids: 20
+        inner_subroutines {
+          name: "reduction_subroutine_cw_phase_1"
+          subroutine_root_id: 24
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "op1_cw_phase_1"
+            opcode: "delay"
+            instruction_id: 22
+            bytes_out: 10
+          }
+          instructions {
+            name: "op2_cw_phase_1"
+            opcode: "delay"
+            instruction_id: 23
+            bytes_out: 10
+          }
+          instructions {
+            name: "sum_cw_phase_1"
+            opcode: "delay"
+            instruction_id: 24
+            ops: 20
+            operand_ids: 22
+            operand_ids: 23
+          }
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-0_mesh-1d_root_1"
+        opcode: "null"
+        instruction_id: 25
+        operand_ids: 21
+        operand_ids: 19
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-0_mesh-1d_ccw_send_2"
+        opcode: "send"
+        instruction_id: 26
+        bytes_out: 10
+        communication_groups {
+          group_ids: 0
+        }
+        operand_ids: 25
+      }
+    }
+  }
+  instructions {
+    name: "reduce-scatter_stage-0_dim-1"
+    opcode: "reduce-scatter"
+    instruction_id: 27
+    bytes_out: 40
+    communication_groups {
+      group_ids: 0
+      group_ids: 1
+      group_ids: 4
+      group_ids: 5
+    }
+    inner_subroutines {
+      name: "reduce-scatter_stage-0_dim-1_mesh-1d"
+      subroutine_root_id: 46
+      execution_probability: 1
+      execution_count: 1
+      instructions {
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_ccw_sendrecv_0"
+        opcode: "sendrecv"
+        instruction_id: 28
+        bytes_in: 10
+        bytes_out: 10
+        communication_groups {
+          group_ids: 0
+          group_ids: 0
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_ccw_reduction_0"
+        opcode: "call"
+        instruction_id: 29
+        operand_ids: 28
+        inner_subroutines {
+          name: "reduction_subroutine_ccw_phase_0"
+          subroutine_root_id: 32
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "op1_ccw_phase_0"
+            opcode: "delay"
+            instruction_id: 30
+            bytes_out: 10
+          }
+          instructions {
+            name: "op2_ccw_phase_0"
+            opcode: "delay"
+            instruction_id: 31
+            bytes_out: 10
+          }
+          instructions {
+            name: "sum_ccw_phase_0"
+            opcode: "delay"
+            instruction_id: 32
+            ops: 20
+            operand_ids: 30
+            operand_ids: 31
+          }
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_cw_sendrecv_0"
+        opcode: "sendrecv"
+        instruction_id: 33
+        bytes_in: 10
+        bytes_out: 10
+        communication_groups {
+          group_ids: 4
+          group_ids: 4
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_cw_reduction_0"
+        opcode: "call"
+        instruction_id: 34
+        operand_ids: 33
+        inner_subroutines {
+          name: "reduction_subroutine_cw_phase_0"
+          subroutine_root_id: 37
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "op1_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 35
+            bytes_out: 10
+          }
+          instructions {
+            name: "op2_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 36
+            bytes_out: 10
+          }
+          instructions {
+            name: "sum_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 37
+            ops: 20
+            operand_ids: 35
+            operand_ids: 36
+          }
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_root_0"
+        opcode: "null"
+        instruction_id: 38
+        operand_ids: 34
+        operand_ids: 29
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_ccw_send_1"
+        opcode: "send"
+        instruction_id: 39
+        bytes_out: 10
+        communication_groups {
+          group_ids: 0
+        }
+        operand_ids: 38
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_cw_sendrecv_1"
+        opcode: "sendrecv"
+        instruction_id: 40
+        bytes_in: 10
+        bytes_out: 10
+        communication_groups {
+          group_ids: 4
+          group_ids: 4
+        }
+        operand_ids: 38
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_cw_reduction_1"
+        opcode: "call"
+        instruction_id: 41
+        operand_ids: 40
+        inner_subroutines {
+          name: "reduction_subroutine_cw_phase_1"
+          subroutine_root_id: 44
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "op1_cw_phase_1"
+            opcode: "delay"
+            instruction_id: 42
+            bytes_out: 10
+          }
+          instructions {
+            name: "op2_cw_phase_1"
+            opcode: "delay"
+            instruction_id: 43
+            bytes_out: 10
+          }
+          instructions {
+            name: "sum_cw_phase_1"
+            opcode: "delay"
+            instruction_id: 44
+            ops: 20
+            operand_ids: 42
+            operand_ids: 43
+          }
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_root_1"
+        opcode: "null"
+        instruction_id: 45
+        operand_ids: 41
+        operand_ids: 39
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_ccw_send_2"
+        opcode: "send"
+        instruction_id: 46
+        bytes_out: 10
+        communication_groups {
+          group_ids: 0
+        }
+        operand_ids: 45
+      }
+    }
+  }
+  instructions {
+    name: "reduce-scatter_stage-0_root"
+    opcode: "null"
+    instruction_id: 47
+    operand_ids: 7
+    operand_ids: 27
+  }
+  instructions {
+    name: "reduce-scatter_stage-1_dim-0"
+    opcode: "reduce-scatter"
+    instruction_id: 48
+    bytes_out: 80
+    communication_groups {
+      group_ids: 0
+      group_ids: 1
+      group_ids: 2
+      group_ids: 3
+    }
+    operand_ids: 47
+    inner_subroutines {
+      name: "reduce-scatter_stage-1_dim-0_mesh-1d"
+      subroutine_root_id: 67
+      execution_probability: 1
+      execution_count: 1
+      instructions {
+        name: "reduce-scatter_stage-1_dim-0_mesh-1d_ccw_sendrecv_0"
+        opcode: "sendrecv"
+        instruction_id: 49
+        bytes_in: 20
+        bytes_out: 20
+        communication_groups {
+          group_ids: 0
+          group_ids: 0
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-0_mesh-1d_ccw_reduction_0"
+        opcode: "call"
+        instruction_id: 50
+        operand_ids: 49
+        inner_subroutines {
+          name: "reduction_subroutine_ccw_phase_0"
+          subroutine_root_id: 53
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "op1_ccw_phase_0"
+            opcode: "delay"
+            instruction_id: 51
+            bytes_out: 20
+          }
+          instructions {
+            name: "op2_ccw_phase_0"
+            opcode: "delay"
+            instruction_id: 52
+            bytes_out: 20
+          }
+          instructions {
+            name: "sum_ccw_phase_0"
+            opcode: "delay"
+            instruction_id: 53
+            ops: 40
+            operand_ids: 51
+            operand_ids: 52
+          }
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-0_mesh-1d_cw_sendrecv_0"
+        opcode: "sendrecv"
+        instruction_id: 54
+        bytes_in: 20
+        bytes_out: 20
+        communication_groups {
+          group_ids: 2
+          group_ids: 2
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-0_mesh-1d_cw_reduction_0"
+        opcode: "call"
+        instruction_id: 55
+        operand_ids: 54
+        inner_subroutines {
+          name: "reduction_subroutine_cw_phase_0"
+          subroutine_root_id: 58
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "op1_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 56
+            bytes_out: 20
+          }
+          instructions {
+            name: "op2_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 57
+            bytes_out: 20
+          }
+          instructions {
+            name: "sum_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 58
+            ops: 40
+            operand_ids: 56
+            operand_ids: 57
+          }
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-0_mesh-1d_root_0"
+        opcode: "null"
+        instruction_id: 59
+        operand_ids: 55
+        operand_ids: 50
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-0_mesh-1d_ccw_send_1"
+        opcode: "send"
+        instruction_id: 60
+        bytes_out: 20
+        communication_groups {
+          group_ids: 0
+        }
+        operand_ids: 59
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-0_mesh-1d_cw_sendrecv_1"
+        opcode: "sendrecv"
+        instruction_id: 61
+        bytes_in: 20
+        bytes_out: 20
+        communication_groups {
+          group_ids: 2
+          group_ids: 2
+        }
+        operand_ids: 59
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-0_mesh-1d_cw_reduction_1"
+        opcode: "call"
+        instruction_id: 62
+        operand_ids: 61
+        inner_subroutines {
+          name: "reduction_subroutine_cw_phase_1"
+          subroutine_root_id: 65
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "op1_cw_phase_1"
+            opcode: "delay"
+            instruction_id: 63
+            bytes_out: 20
+          }
+          instructions {
+            name: "op2_cw_phase_1"
+            opcode: "delay"
+            instruction_id: 64
+            bytes_out: 20
+          }
+          instructions {
+            name: "sum_cw_phase_1"
+            opcode: "delay"
+            instruction_id: 65
+            ops: 40
+            operand_ids: 63
+            operand_ids: 64
+          }
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-0_mesh-1d_root_1"
+        opcode: "null"
+        instruction_id: 66
+        operand_ids: 62
+        operand_ids: 60
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-0_mesh-1d_ccw_send_2"
+        opcode: "send"
+        instruction_id: 67
+        bytes_out: 20
+        communication_groups {
+          group_ids: 0
+        }
+        operand_ids: 66
+      }
+    }
+  }
+  instructions {
+    name: "reduce-scatter_stage-1_dim-1"
+    opcode: "reduce-scatter"
+    instruction_id: 68
+    bytes_out: 80
+    communication_groups {
+      group_ids: 0
+      group_ids: 1
+      group_ids: 4
+      group_ids: 5
+    }
+    operand_ids: 47
+    inner_subroutines {
+      name: "reduce-scatter_stage-1_dim-1_mesh-1d"
+      subroutine_root_id: 87
+      execution_probability: 1
+      execution_count: 1
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_ccw_sendrecv_0"
+        opcode: "sendrecv"
+        instruction_id: 69
+        bytes_in: 20
+        bytes_out: 20
+        communication_groups {
+          group_ids: 0
+          group_ids: 0
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_ccw_reduction_0"
+        opcode: "call"
+        instruction_id: 70
+        operand_ids: 69
+        inner_subroutines {
+          name: "reduction_subroutine_ccw_phase_0"
+          subroutine_root_id: 73
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "op1_ccw_phase_0"
+            opcode: "delay"
+            instruction_id: 71
+            bytes_out: 20
+          }
+          instructions {
+            name: "op2_ccw_phase_0"
+            opcode: "delay"
+            instruction_id: 72
+            bytes_out: 20
+          }
+          instructions {
+            name: "sum_ccw_phase_0"
+            opcode: "delay"
+            instruction_id: 73
+            ops: 40
+            operand_ids: 71
+            operand_ids: 72
+          }
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_cw_sendrecv_0"
+        opcode: "sendrecv"
+        instruction_id: 74
+        bytes_in: 20
+        bytes_out: 20
+        communication_groups {
+          group_ids: 4
+          group_ids: 4
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_cw_reduction_0"
+        opcode: "call"
+        instruction_id: 75
+        operand_ids: 74
+        inner_subroutines {
+          name: "reduction_subroutine_cw_phase_0"
+          subroutine_root_id: 78
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "op1_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 76
+            bytes_out: 20
+          }
+          instructions {
+            name: "op2_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 77
+            bytes_out: 20
+          }
+          instructions {
+            name: "sum_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 78
+            ops: 40
+            operand_ids: 76
+            operand_ids: 77
+          }
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_root_0"
+        opcode: "null"
+        instruction_id: 79
+        operand_ids: 75
+        operand_ids: 70
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_ccw_send_1"
+        opcode: "send"
+        instruction_id: 80
+        bytes_out: 20
+        communication_groups {
+          group_ids: 0
+        }
+        operand_ids: 79
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_cw_sendrecv_1"
+        opcode: "sendrecv"
+        instruction_id: 81
+        bytes_in: 20
+        bytes_out: 20
+        communication_groups {
+          group_ids: 4
+          group_ids: 4
+        }
+        operand_ids: 79
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_cw_reduction_1"
+        opcode: "call"
+        instruction_id: 82
+        operand_ids: 81
+        inner_subroutines {
+          name: "reduction_subroutine_cw_phase_1"
+          subroutine_root_id: 85
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "op1_cw_phase_1"
+            opcode: "delay"
+            instruction_id: 83
+            bytes_out: 20
+          }
+          instructions {
+            name: "op2_cw_phase_1"
+            opcode: "delay"
+            instruction_id: 84
+            bytes_out: 20
+          }
+          instructions {
+            name: "sum_cw_phase_1"
+            opcode: "delay"
+            instruction_id: 85
+            ops: 40
+            operand_ids: 83
+            operand_ids: 84
+          }
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_root_1"
+        opcode: "null"
+        instruction_id: 86
+        operand_ids: 82
+        operand_ids: 80
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_ccw_send_2"
+        opcode: "send"
+        instruction_id: 87
+        bytes_out: 20
+        communication_groups {
+          group_ids: 0
+        }
+        operand_ids: 86
+      }
+    }
+  }
+  instructions {
+    name: "reduce-scatter_stage-1_root"
+    opcode: "null"
+    instruction_id: 88
+    operand_ids: 48
+    operand_ids: 68
+  }
+}
+      )proto";
+  google::protobuf::TextFormat::ParseFromString(test_str,
+                                                &proto);
+  return proto;
+}  // NOLINT
+
 // Tests expanding 2D-Mesh reduce-scatter
 TEST(Mesh2dReduceScatter, NoBarrier) {
   auto graph = absl::make_unique<paragraph::Graph>("test_graph", 1);
@@ -68,7 +842,8 @@ TEST(Mesh2dReduceScatter, NoBarrier) {
       "reduce-scatter": {
         "algorithm": "mesh-2d",
         "concentration": 2,
-        "dimension_widths": [2, 2]
+        "dimension_widths": [2, 2],
+        "integrated_local_exchange": true
       }
     }
   )"_json;
@@ -77,8 +852,16 @@ TEST(Mesh2dReduceScatter, NoBarrier) {
      paragraph::TranslatorType::kCollective, config));
   EXPECT_OK(translators["reduce-scatter"]->Translate(reducescatter));
 
-  paragraph::InstructionProto reducescatter_proto;
-  std::string reducescatter_str =
+  paragraph::InstructionProto reducescatter_proto =
+      Mesh2dReduceScatter_no_barrier_test_proto();
+  EXPECT_TRUE(google::protobuf::util::MessageDifferencer::Equals(
+      reducescatter->ToProto().value(), reducescatter_proto));
+}
+
+paragraph::InstructionProto
+Mesh2dReduceScatter_with_barrier_test_proto() {
+  paragraph::InstructionProto proto;
+  std::string test_str =
       R"proto(
 name: "reduce-scatter"
 opcode: "reduce-scatter"
@@ -96,183 +879,499 @@ communication_groups {
 }
 inner_subroutines {
   name: "reduce-scatter_mesh-2d"
-  subroutine_root_id: 19
+  subroutine_root_id: 47
   execution_probability: 1
   execution_count: 1
   instructions {
-    name: "reduce-scatter_dim-conc"
+    name: "reduce-scatter_stage-0_dim-0"
     opcode: "reduce-scatter"
     instruction_id: 7
     bytes_out: 20
     communication_groups {
       group_ids: 0
-      group_ids: 1
+      group_ids: 2
     }
     inner_subroutines {
-      name: "reduce-scatter_dim-conc_mesh-1d"
-      subroutine_root_id: 9
+      name: "reduce-scatter_stage-0_dim-0_mesh-1d"
+      subroutine_root_id: 12
       execution_probability: 1
       execution_count: 1
       instructions {
-        name: "reduce-scatter_dim-conc_mesh-1d_ccw_sendrecv_0"
-        opcode: "sendrecv"
+        name: "reduce-scatter_stage-0_dim-0_unidir-ring_barrier"
+        opcode: "barrier"
         instruction_id: 8
+        communication_groups {
+          group_ids: 0
+          group_ids: 2
+        }
+        inner_subroutines {
+          name: "reduce-scatter_stage-0_dim-0_unidir-ring_barrier_centralized"
+          subroutine_root_id: 10
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "reduce-scatter_stage-0_dim-0_unidir-ring_barrier_centralized_send_to_0"
+            opcode: "send"
+            instruction_id: 9
+            communication_groups {
+              group_ids: 0
+            }
+          }
+          instructions {
+            name: "reduce-scatter_stage-0_dim-0_unidir-ring_barrier_centralized_recv_from_0"
+            opcode: "recv"
+            instruction_id: 10
+            communication_groups {
+              group_ids: 0
+            }
+            operand_ids: 9
+          }
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-0_mesh-1d_ccw_sendrecv_0"
+        opcode: "sendrecv"
+        instruction_id: 11
         bytes_in: 10
         bytes_out: 10
         communication_groups {
           group_ids: 0
           group_ids: 0
         }
+        operand_ids: 8
       }
       instructions {
-        name: "reduce-scatter_dim-conc_mesh-1d_ccw_reduction_0"
+        name: "reduce-scatter_stage-0_dim-0_mesh-1d_ccw_reduction_0"
         opcode: "call"
-        instruction_id: 9
-        operand_ids: 8
+        instruction_id: 12
+        operand_ids: 11
         inner_subroutines {
           name: "reduction_subroutine_ccw_phase_0"
-          subroutine_root_id: 12
+          subroutine_root_id: 15
           execution_probability: 1
           execution_count: 1
           instructions {
             name: "op1_ccw_phase_0"
             opcode: "delay"
-            instruction_id: 10
+            instruction_id: 13
             bytes_out: 10
           }
           instructions {
             name: "op2_ccw_phase_0"
             opcode: "delay"
-            instruction_id: 11
+            instruction_id: 14
             bytes_out: 10
           }
           instructions {
             name: "sum_ccw_phase_0"
             opcode: "delay"
-            instruction_id: 12
+            instruction_id: 15
             ops: 20
-            operand_ids: 10
-            operand_ids: 11
+            operand_ids: 13
+            operand_ids: 14
           }
         }
       }
     }
   }
   instructions {
-    name: "reduce-scatter_dim-0"
+    name: "reduce-scatter_stage-0_dim-1"
     opcode: "reduce-scatter"
-    instruction_id: 13
+    instruction_id: 16
     bytes_out: 20
     communication_groups {
-      group_ids: 1
-      group_ids: 3
+      group_ids: 2
+      group_ids: 6
     }
-    operand_ids: 7
     inner_subroutines {
-      name: "reduce-scatter_dim-0_mesh-1d"
-      subroutine_root_id: 15
+      name: "reduce-scatter_stage-0_dim-1_mesh-1d"
+      subroutine_root_id: 22
       execution_probability: 1
       execution_count: 1
       instructions {
-        name: "reduce-scatter_dim-0_mesh-1d_cw_sendrecv_0"
-        opcode: "sendrecv"
-        instruction_id: 14
-        bytes_in: 10
-        bytes_out: 10
+        name: "reduce-scatter_stage-0_dim-1_unidir-ring_barrier"
+        opcode: "barrier"
+        instruction_id: 17
         communication_groups {
-          group_ids: 3
-          group_ids: 3
+          group_ids: 2
+          group_ids: 6
         }
-      }
-      instructions {
-        name: "reduce-scatter_dim-0_mesh-1d_cw_reduction_0"
-        opcode: "call"
-        instruction_id: 15
-        operand_ids: 14
         inner_subroutines {
-          name: "reduction_subroutine_cw_phase_0"
-          subroutine_root_id: 18
+          name: "reduce-scatter_stage-0_dim-1_unidir-ring_barrier_centralized"
+          subroutine_root_id: 20
           execution_probability: 1
           execution_count: 1
           instructions {
-            name: "op1_cw_phase_0"
-            opcode: "delay"
-            instruction_id: 16
-            bytes_out: 10
-          }
-          instructions {
-            name: "op2_cw_phase_0"
-            opcode: "delay"
-            instruction_id: 17
-            bytes_out: 10
-          }
-          instructions {
-            name: "sum_cw_phase_0"
-            opcode: "delay"
+            name: "reduce-scatter_stage-0_dim-1_unidir-ring_barrier_centralized_coordinator_recv_from_6"
+            opcode: "recv"
             instruction_id: 18
-            ops: 20
-            operand_ids: 16
-            operand_ids: 17
+            communication_groups {
+              group_ids: 6
+            }
+          }
+          instructions {
+            name: "reduce-scatter_stage-0_dim-1_unidir-ring_barrier_centralized_coordinator_send_to_6"
+            opcode: "send"
+            instruction_id: 19
+            communication_groups {
+              group_ids: 6
+            }
+            operand_ids: 18
+          }
+          instructions {
+            name: "reduce-scatter_stage-0_dim-1_unidir-ring_barrier_centralized_root_2"
+            opcode: "null"
+            instruction_id: 20
+            operand_ids: 19
           }
         }
       }
-    }
-  }
-  instructions {
-    name: "reduce-scatter_dim-1"
-    opcode: "reduce-scatter"
-    instruction_id: 19
-    bytes_out: 20
-    communication_groups {
-      group_ids: 1
-      group_ids: 5
-    }
-    operand_ids: 13
-    inner_subroutines {
-      name: "reduce-scatter_dim-1_mesh-1d"
-      subroutine_root_id: 21
-      execution_probability: 1
-      execution_count: 1
       instructions {
-        name: "reduce-scatter_dim-1_mesh-1d_cw_sendrecv_0"
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_cw_sendrecv_0"
         opcode: "sendrecv"
-        instruction_id: 20
+        instruction_id: 21
         bytes_in: 10
         bytes_out: 10
         communication_groups {
-          group_ids: 5
-          group_ids: 5
+          group_ids: 6
+          group_ids: 6
         }
+        operand_ids: 17
       }
       instructions {
-        name: "reduce-scatter_dim-1_mesh-1d_cw_reduction_0"
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_cw_reduction_0"
         opcode: "call"
-        instruction_id: 21
-        operand_ids: 20
+        instruction_id: 22
+        operand_ids: 21
         inner_subroutines {
           name: "reduction_subroutine_cw_phase_0"
-          subroutine_root_id: 24
+          subroutine_root_id: 25
           execution_probability: 1
           execution_count: 1
           instructions {
             name: "op1_cw_phase_0"
-            opcode: "delay"
-            instruction_id: 22
-            bytes_out: 10
-          }
-          instructions {
-            name: "op2_cw_phase_0"
             opcode: "delay"
             instruction_id: 23
             bytes_out: 10
           }
           instructions {
-            name: "sum_cw_phase_0"
+            name: "op2_cw_phase_0"
             opcode: "delay"
             instruction_id: 24
+            bytes_out: 10
+          }
+          instructions {
+            name: "sum_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 25
             ops: 20
-            operand_ids: 22
             operand_ids: 23
+            operand_ids: 24
+          }
+        }
+      }
+    }
+  }
+  instructions {
+    name: "reduce-scatter_stage-0_root"
+    opcode: "null"
+    instruction_id: 26
+    operand_ids: 7
+    operand_ids: 16
+  }
+  instructions {
+    name: "reduce-scatter_stage-1_dim-0"
+    opcode: "reduce-scatter"
+    instruction_id: 27
+    bytes_out: 40
+    communication_groups {
+      group_ids: 0
+      group_ids: 2
+    }
+    operand_ids: 26
+    inner_subroutines {
+      name: "reduce-scatter_stage-1_dim-0_mesh-1d"
+      subroutine_root_id: 32
+      execution_probability: 1
+      execution_count: 1
+      instructions {
+        name: "reduce-scatter_stage-1_dim-0_unidir-ring_barrier"
+        opcode: "barrier"
+        instruction_id: 28
+        communication_groups {
+          group_ids: 0
+          group_ids: 2
+        }
+        inner_subroutines {
+          name: "reduce-scatter_stage-1_dim-0_unidir-ring_barrier_centralized"
+          subroutine_root_id: 30
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "reduce-scatter_stage-1_dim-0_unidir-ring_barrier_centralized_send_to_0"
+            opcode: "send"
+            instruction_id: 29
+            communication_groups {
+              group_ids: 0
+            }
+          }
+          instructions {
+            name: "reduce-scatter_stage-1_dim-0_unidir-ring_barrier_centralized_recv_from_0"
+            opcode: "recv"
+            instruction_id: 30
+            communication_groups {
+              group_ids: 0
+            }
+            operand_ids: 29
+          }
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-0_mesh-1d_ccw_sendrecv_0"
+        opcode: "sendrecv"
+        instruction_id: 31
+        bytes_in: 20
+        bytes_out: 20
+        communication_groups {
+          group_ids: 0
+          group_ids: 0
+        }
+        operand_ids: 28
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-0_mesh-1d_ccw_reduction_0"
+        opcode: "call"
+        instruction_id: 32
+        operand_ids: 31
+        inner_subroutines {
+          name: "reduction_subroutine_ccw_phase_0"
+          subroutine_root_id: 35
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "op1_ccw_phase_0"
+            opcode: "delay"
+            instruction_id: 33
+            bytes_out: 20
+          }
+          instructions {
+            name: "op2_ccw_phase_0"
+            opcode: "delay"
+            instruction_id: 34
+            bytes_out: 20
+          }
+          instructions {
+            name: "sum_ccw_phase_0"
+            opcode: "delay"
+            instruction_id: 35
+            ops: 40
+            operand_ids: 33
+            operand_ids: 34
+          }
+        }
+      }
+    }
+  }
+  instructions {
+    name: "reduce-scatter_stage-1_dim-1"
+    opcode: "reduce-scatter"
+    instruction_id: 36
+    bytes_out: 40
+    communication_groups {
+      group_ids: 2
+      group_ids: 6
+    }
+    operand_ids: 26
+    inner_subroutines {
+      name: "reduce-scatter_stage-1_dim-1_mesh-1d"
+      subroutine_root_id: 42
+      execution_probability: 1
+      execution_count: 1
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_unidir-ring_barrier"
+        opcode: "barrier"
+        instruction_id: 37
+        communication_groups {
+          group_ids: 2
+          group_ids: 6
+        }
+        inner_subroutines {
+          name: "reduce-scatter_stage-1_dim-1_unidir-ring_barrier_centralized"
+          subroutine_root_id: 40
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "reduce-scatter_stage-1_dim-1_unidir-ring_barrier_centralized_coordinator_recv_from_6"
+            opcode: "recv"
+            instruction_id: 38
+            communication_groups {
+              group_ids: 6
+            }
+          }
+          instructions {
+            name: "reduce-scatter_stage-1_dim-1_unidir-ring_barrier_centralized_coordinator_send_to_6"
+            opcode: "send"
+            instruction_id: 39
+            communication_groups {
+              group_ids: 6
+            }
+            operand_ids: 38
+          }
+          instructions {
+            name: "reduce-scatter_stage-1_dim-1_unidir-ring_barrier_centralized_root_2"
+            opcode: "null"
+            instruction_id: 40
+            operand_ids: 39
+          }
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_cw_sendrecv_0"
+        opcode: "sendrecv"
+        instruction_id: 41
+        bytes_in: 20
+        bytes_out: 20
+        communication_groups {
+          group_ids: 6
+          group_ids: 6
+        }
+        operand_ids: 37
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_cw_reduction_0"
+        opcode: "call"
+        instruction_id: 42
+        operand_ids: 41
+        inner_subroutines {
+          name: "reduction_subroutine_cw_phase_0"
+          subroutine_root_id: 45
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "op1_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 43
+            bytes_out: 20
+          }
+          instructions {
+            name: "op2_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 44
+            bytes_out: 20
+          }
+          instructions {
+            name: "sum_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 45
+            ops: 40
+            operand_ids: 43
+            operand_ids: 44
+          }
+        }
+      }
+    }
+  }
+  instructions {
+    name: "reduce-scatter_stage-1_root"
+    opcode: "null"
+    instruction_id: 46
+    operand_ids: 27
+    operand_ids: 36
+  }
+  instructions {
+    name: "reduce-scatter_conc"
+    opcode: "reduce-scatter"
+    instruction_id: 47
+    bytes_out: 80
+    communication_groups {
+      group_ids: 2
+      group_ids: 3
+    }
+    operand_ids: 46
+    inner_subroutines {
+      name: "reduce-scatter_conc_mesh-1d"
+      subroutine_root_id: 53
+      execution_probability: 1
+      execution_count: 1
+      instructions {
+        name: "reduce-scatter_conc_unidir-ring_barrier"
+        opcode: "barrier"
+        instruction_id: 48
+        communication_groups {
+          group_ids: 2
+          group_ids: 3
+        }
+        inner_subroutines {
+          name: "reduce-scatter_conc_unidir-ring_barrier_centralized"
+          subroutine_root_id: 51
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "reduce-scatter_conc_unidir-ring_barrier_centralized_coordinator_recv_from_3"
+            opcode: "recv"
+            instruction_id: 49
+            communication_groups {
+              group_ids: 3
+            }
+          }
+          instructions {
+            name: "reduce-scatter_conc_unidir-ring_barrier_centralized_coordinator_send_to_3"
+            opcode: "send"
+            instruction_id: 50
+            communication_groups {
+              group_ids: 3
+            }
+            operand_ids: 49
+          }
+          instructions {
+            name: "reduce-scatter_conc_unidir-ring_barrier_centralized_root_2"
+            opcode: "null"
+            instruction_id: 51
+            operand_ids: 50
+          }
+        }
+      }
+      instructions {
+        name: "reduce-scatter_conc_mesh-1d_cw_sendrecv_0"
+        opcode: "sendrecv"
+        instruction_id: 52
+        bytes_in: 40
+        bytes_out: 40
+        communication_groups {
+          group_ids: 3
+          group_ids: 3
+        }
+        operand_ids: 48
+      }
+      instructions {
+        name: "reduce-scatter_conc_mesh-1d_cw_reduction_0"
+        opcode: "call"
+        instruction_id: 53
+        operand_ids: 52
+        inner_subroutines {
+          name: "reduction_subroutine_cw_phase_0"
+          subroutine_root_id: 56
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "op1_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 54
+            bytes_out: 40
+          }
+          instructions {
+            name: "op2_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 55
+            bytes_out: 40
+          }
+          instructions {
+            name: "sum_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 56
+            ops: 80
+            operand_ids: 54
+            operand_ids: 55
           }
         }
       }
@@ -280,11 +1379,10 @@ inner_subroutines {
   }
 }
       )proto";
-  google::protobuf::TextFormat::ParseFromString(reducescatter_str,
-                                                &reducescatter_proto);
-  EXPECT_TRUE(google::protobuf::util::MessageDifferencer::Equals(
-      reducescatter->ToProto().value(), reducescatter_proto));
-}
+  google::protobuf::TextFormat::ParseFromString(test_str,
+                                                &proto);
+  return proto;
+}  // NOLINT
 
 // Tests expanding 1D-Mesh reduce-scatter with barrier
 TEST(Mesh2dReduceScatter, WithBarrier) {
@@ -343,325 +1441,324 @@ TEST(Mesh2dReduceScatter, WithBarrier) {
      paragraph::TranslatorType::kCollective, config));
   EXPECT_OK(translators["reduce-scatter"]->Translate(reducescatter));
 
-  paragraph::InstructionProto reducescatter_proto;
-  std::string reducescatter_str =
+  paragraph::InstructionProto reducescatter_proto =
+      Mesh2dReduceScatter_with_barrier_test_proto();
+  EXPECT_TRUE(google::protobuf::util::MessageDifferencer::Equals(
+      reducescatter->ToProto().value(), reducescatter_proto));
+}
+
+paragraph::InstructionProto
+Mesh2dReduceScatter_inconsecutive_proc_test_proto() {
+  paragraph::InstructionProto proto;
+  std::string test_str =
       R"proto(
 name: "reduce-scatter"
 opcode: "reduce-scatter"
 instruction_id: 2
-bytes_out: 80
+bytes_out: 48
 communication_groups {
   group_ids: 0
-  group_ids: 1
   group_ids: 2
-  group_ids: 3
   group_ids: 4
-  group_ids: 5
-  group_ids: 6
-  group_ids: 7
 }
 inner_subroutines {
   name: "reduce-scatter_mesh-2d"
-  subroutine_root_id: 26
+  subroutine_root_id: 38
   execution_probability: 1
   execution_count: 1
   instructions {
-    name: "reduce-scatter_dim-conc"
+    name: "reduce-scatter_stage-0_dim-1"
     opcode: "reduce-scatter"
     instruction_id: 7
-    bytes_out: 20
-    communication_groups {
-      group_ids: 2
-      group_ids: 3
-    }
-    inner_subroutines {
-      name: "reduce-scatter_dim-conc_mesh-1d"
-      subroutine_root_id: 13
-      execution_probability: 1
-      execution_count: 1
-      instructions {
-        name: "reduce-scatter_dim-conc_unidir-ring_barrier"
-        opcode: "barrier"
-        instruction_id: 8
-        communication_groups {
-          group_ids: 2
-          group_ids: 3
-        }
-        inner_subroutines {
-          name: "reduce-scatter_dim-conc_unidir-ring_barrier_centralized"
-          subroutine_root_id: 11
-          execution_probability: 1
-          execution_count: 1
-          instructions {
-            name: "reduce-scatter_dim-conc_unidir-ring_barrier_centralized_coordinator_recv_from_3"
-            opcode: "recv"
-            instruction_id: 9
-            communication_groups {
-              group_ids: 3
-            }
-          }
-          instructions {
-            name: "reduce-scatter_dim-conc_unidir-ring_barrier_centralized_coordinator_send_to_3"
-            opcode: "send"
-            instruction_id: 10
-            communication_groups {
-              group_ids: 3
-            }
-            operand_ids: 9
-          }
-          instructions {
-            name: "reduce-scatter_dim-conc_unidir-ring_barrier_centralized_root_2"
-            opcode: "null"
-            instruction_id: 11
-            operand_ids: 10
-          }
-        }
-      }
-      instructions {
-        name: "reduce-scatter_dim-conc_mesh-1d_cw_sendrecv_0"
-        opcode: "sendrecv"
-        instruction_id: 12
-        bytes_in: 10
-        bytes_out: 10
-        communication_groups {
-          group_ids: 3
-          group_ids: 3
-        }
-        operand_ids: 8
-      }
-      instructions {
-        name: "reduce-scatter_dim-conc_mesh-1d_cw_reduction_0"
-        opcode: "call"
-        instruction_id: 13
-        operand_ids: 12
-        inner_subroutines {
-          name: "reduction_subroutine_cw_phase_0"
-          subroutine_root_id: 16
-          execution_probability: 1
-          execution_count: 1
-          instructions {
-            name: "op1_cw_phase_0"
-            opcode: "delay"
-            instruction_id: 14
-            bytes_out: 10
-          }
-          instructions {
-            name: "op2_cw_phase_0"
-            opcode: "delay"
-            instruction_id: 15
-            bytes_out: 10
-          }
-          instructions {
-            name: "sum_cw_phase_0"
-            opcode: "delay"
-            instruction_id: 16
-            ops: 20
-            operand_ids: 14
-            operand_ids: 15
-          }
-        }
-      }
-    }
-  }
-  instructions {
-    name: "reduce-scatter_dim-0"
-    opcode: "reduce-scatter"
-    instruction_id: 17
-    bytes_out: 20
+    bytes_out: 48
     communication_groups {
       group_ids: 0
       group_ids: 2
+      group_ids: 4
     }
-    operand_ids: 7
     inner_subroutines {
-      name: "reduce-scatter_dim-0_mesh-1d"
-      subroutine_root_id: 22
+      name: "reduce-scatter_stage-0_dim-1_mesh-1d"
+      subroutine_root_id: 21
       execution_probability: 1
       execution_count: 1
       instructions {
-        name: "reduce-scatter_dim-0_unidir-ring_barrier"
-        opcode: "barrier"
-        instruction_id: 18
-        communication_groups {
-          group_ids: 0
-          group_ids: 2
-        }
-        inner_subroutines {
-          name: "reduce-scatter_dim-0_unidir-ring_barrier_centralized"
-          subroutine_root_id: 20
-          execution_probability: 1
-          execution_count: 1
-          instructions {
-            name: "reduce-scatter_dim-0_unidir-ring_barrier_centralized_send_to_0"
-            opcode: "send"
-            instruction_id: 19
-            communication_groups {
-              group_ids: 0
-            }
-          }
-          instructions {
-            name: "reduce-scatter_dim-0_unidir-ring_barrier_centralized_recv_from_0"
-            opcode: "recv"
-            instruction_id: 20
-            communication_groups {
-              group_ids: 0
-            }
-            operand_ids: 19
-          }
-        }
-      }
-      instructions {
-        name: "reduce-scatter_dim-0_mesh-1d_ccw_sendrecv_0"
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_ccw_sendrecv_0"
         opcode: "sendrecv"
-        instruction_id: 21
-        bytes_in: 10
-        bytes_out: 10
+        instruction_id: 8
+        bytes_in: 16
+        bytes_out: 16
         communication_groups {
           group_ids: 0
           group_ids: 0
         }
-        operand_ids: 18
       }
       instructions {
-        name: "reduce-scatter_dim-0_mesh-1d_ccw_reduction_0"
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_ccw_reduction_0"
         opcode: "call"
-        instruction_id: 22
-        operand_ids: 21
+        instruction_id: 9
+        operand_ids: 8
         inner_subroutines {
           name: "reduction_subroutine_ccw_phase_0"
-          subroutine_root_id: 25
+          subroutine_root_id: 12
           execution_probability: 1
           execution_count: 1
           instructions {
             name: "op1_ccw_phase_0"
             opcode: "delay"
-            instruction_id: 23
-            bytes_out: 10
+            instruction_id: 10
+            bytes_out: 16
           }
           instructions {
             name: "op2_ccw_phase_0"
             opcode: "delay"
-            instruction_id: 24
-            bytes_out: 10
+            instruction_id: 11
+            bytes_out: 16
           }
           instructions {
             name: "sum_ccw_phase_0"
             opcode: "delay"
-            instruction_id: 25
-            ops: 20
-            operand_ids: 23
-            operand_ids: 24
-          }
-        }
-      }
-    }
-  }
-  instructions {
-    name: "reduce-scatter_dim-1"
-    opcode: "reduce-scatter"
-    instruction_id: 26
-    bytes_out: 20
-    communication_groups {
-      group_ids: 2
-      group_ids: 6
-    }
-    operand_ids: 17
-    inner_subroutines {
-      name: "reduce-scatter_dim-1_mesh-1d"
-      subroutine_root_id: 32
-      execution_probability: 1
-      execution_count: 1
-      instructions {
-        name: "reduce-scatter_dim-1_unidir-ring_barrier"
-        opcode: "barrier"
-        instruction_id: 27
-        communication_groups {
-          group_ids: 2
-          group_ids: 6
-        }
-        inner_subroutines {
-          name: "reduce-scatter_dim-1_unidir-ring_barrier_centralized"
-          subroutine_root_id: 30
-          execution_probability: 1
-          execution_count: 1
-          instructions {
-            name: "reduce-scatter_dim-1_unidir-ring_barrier_centralized_coordinator_recv_from_6"
-            opcode: "recv"
-            instruction_id: 28
-            communication_groups {
-              group_ids: 6
-            }
-          }
-          instructions {
-            name: "reduce-scatter_dim-1_unidir-ring_barrier_centralized_coordinator_send_to_6"
-            opcode: "send"
-            instruction_id: 29
-            communication_groups {
-              group_ids: 6
-            }
-            operand_ids: 28
-          }
-          instructions {
-            name: "reduce-scatter_dim-1_unidir-ring_barrier_centralized_root_2"
-            opcode: "null"
-            instruction_id: 30
-            operand_ids: 29
+            instruction_id: 12
+            ops: 32
+            operand_ids: 10
+            operand_ids: 11
           }
         }
       }
       instructions {
-        name: "reduce-scatter_dim-1_mesh-1d_cw_sendrecv_0"
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_cw_sendrecv_0"
         opcode: "sendrecv"
-        instruction_id: 31
-        bytes_in: 10
-        bytes_out: 10
+        instruction_id: 13
+        bytes_in: 16
+        bytes_out: 16
         communication_groups {
-          group_ids: 6
-          group_ids: 6
+          group_ids: 4
+          group_ids: 4
         }
-        operand_ids: 27
       }
       instructions {
-        name: "reduce-scatter_dim-1_mesh-1d_cw_reduction_0"
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_cw_reduction_0"
         opcode: "call"
-        instruction_id: 32
-        operand_ids: 31
+        instruction_id: 14
+        operand_ids: 13
         inner_subroutines {
           name: "reduction_subroutine_cw_phase_0"
-          subroutine_root_id: 35
+          subroutine_root_id: 17
           execution_probability: 1
           execution_count: 1
           instructions {
             name: "op1_cw_phase_0"
             opcode: "delay"
-            instruction_id: 33
-            bytes_out: 10
+            instruction_id: 15
+            bytes_out: 16
           }
           instructions {
             name: "op2_cw_phase_0"
             opcode: "delay"
-            instruction_id: 34
-            bytes_out: 10
+            instruction_id: 16
+            bytes_out: 16
           }
           instructions {
             name: "sum_cw_phase_0"
             opcode: "delay"
-            instruction_id: 35
-            ops: 20
-            operand_ids: 33
-            operand_ids: 34
+            instruction_id: 17
+            ops: 32
+            operand_ids: 15
+            operand_ids: 16
           }
         }
       }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_root_0"
+        opcode: "null"
+        instruction_id: 18
+        operand_ids: 14
+        operand_ids: 9
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_ccw_send_1"
+        opcode: "send"
+        instruction_id: 19
+        bytes_out: 16
+        communication_groups {
+          group_ids: 0
+        }
+        operand_ids: 18
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_cw_send_1"
+        opcode: "send"
+        instruction_id: 20
+        bytes_out: 16
+        communication_groups {
+          group_ids: 4
+        }
+        operand_ids: 18
+      }
+      instructions {
+        name: "reduce-scatter_stage-0_dim-1_mesh-1d_root_1"
+        opcode: "null"
+        instruction_id: 21
+        operand_ids: 20
+        operand_ids: 19
+      }
     }
+  }
+  instructions {
+    name: "reduce-scatter_stage-0_root"
+    opcode: "null"
+    instruction_id: 22
+    operand_ids: 7
+  }
+  instructions {
+    name: "reduce-scatter_stage-1_dim-1"
+    opcode: "reduce-scatter"
+    instruction_id: 23
+    bytes_out: 144
+    communication_groups {
+      group_ids: 0
+      group_ids: 2
+      group_ids: 4
+    }
+    operand_ids: 22
+    inner_subroutines {
+      name: "reduce-scatter_stage-1_dim-1_mesh-1d"
+      subroutine_root_id: 37
+      execution_probability: 1
+      execution_count: 1
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_ccw_sendrecv_0"
+        opcode: "sendrecv"
+        instruction_id: 24
+        bytes_in: 48
+        bytes_out: 48
+        communication_groups {
+          group_ids: 0
+          group_ids: 0
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_ccw_reduction_0"
+        opcode: "call"
+        instruction_id: 25
+        operand_ids: 24
+        inner_subroutines {
+          name: "reduction_subroutine_ccw_phase_0"
+          subroutine_root_id: 28
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "op1_ccw_phase_0"
+            opcode: "delay"
+            instruction_id: 26
+            bytes_out: 48
+          }
+          instructions {
+            name: "op2_ccw_phase_0"
+            opcode: "delay"
+            instruction_id: 27
+            bytes_out: 48
+          }
+          instructions {
+            name: "sum_ccw_phase_0"
+            opcode: "delay"
+            instruction_id: 28
+            ops: 96
+            operand_ids: 26
+            operand_ids: 27
+          }
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_cw_sendrecv_0"
+        opcode: "sendrecv"
+        instruction_id: 29
+        bytes_in: 48
+        bytes_out: 48
+        communication_groups {
+          group_ids: 4
+          group_ids: 4
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_cw_reduction_0"
+        opcode: "call"
+        instruction_id: 30
+        operand_ids: 29
+        inner_subroutines {
+          name: "reduction_subroutine_cw_phase_0"
+          subroutine_root_id: 33
+          execution_probability: 1
+          execution_count: 1
+          instructions {
+            name: "op1_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 31
+            bytes_out: 48
+          }
+          instructions {
+            name: "op2_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 32
+            bytes_out: 48
+          }
+          instructions {
+            name: "sum_cw_phase_0"
+            opcode: "delay"
+            instruction_id: 33
+            ops: 96
+            operand_ids: 31
+            operand_ids: 32
+          }
+        }
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_root_0"
+        opcode: "null"
+        instruction_id: 34
+        operand_ids: 30
+        operand_ids: 25
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_ccw_send_1"
+        opcode: "send"
+        instruction_id: 35
+        bytes_out: 48
+        communication_groups {
+          group_ids: 0
+        }
+        operand_ids: 34
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_cw_send_1"
+        opcode: "send"
+        instruction_id: 36
+        bytes_out: 48
+        communication_groups {
+          group_ids: 4
+        }
+        operand_ids: 34
+      }
+      instructions {
+        name: "reduce-scatter_stage-1_dim-1_mesh-1d_root_1"
+        opcode: "null"
+        instruction_id: 37
+        operand_ids: 36
+        operand_ids: 35
+      }
+    }
+  }
+  instructions {
+    name: "reduce-scatter_stage-1_root"
+    opcode: "null"
+    instruction_id: 38
+    operand_ids: 23
   }
 }
       )proto";
-  google::protobuf::TextFormat::ParseFromString(reducescatter_str,
-                                                &reducescatter_proto);
-  EXPECT_TRUE(google::protobuf::util::MessageDifferencer::Equals(
-      reducescatter->ToProto().value(), reducescatter_proto));
-}
+  google::protobuf::TextFormat::ParseFromString(test_str,
+                                                &proto);
+  return proto;
+}  // NOLINT
 
 // Tests expanding 1D-Mesh reduce-scatter
 TEST(Mesh2dReduceScatter, InconsecutiveProcessors) {
@@ -715,164 +1812,8 @@ TEST(Mesh2dReduceScatter, InconsecutiveProcessors) {
      paragraph::TranslatorType::kCollective, config));
   EXPECT_OK(translators["reduce-scatter"]->Translate(reducescatter));
 
-  paragraph::InstructionProto reducescatter_proto;
-  std::string reducescatter_str =
-      R"proto(
-name: "reduce-scatter"
-opcode: "reduce-scatter"
-instruction_id: 2
-bytes_out: 48
-communication_groups {
-  group_ids: 0
-  group_ids: 2
-  group_ids: 4
-}
-inner_subroutines {
-  name: "reduce-scatter_mesh-2d"
-  subroutine_root_id: 7
-  execution_probability: 1
-  execution_count: 1
-  instructions {
-    name: "reduce-scatter_dim-1"
-    opcode: "reduce-scatter"
-    instruction_id: 7
-    bytes_out: 48
-    communication_groups {
-      group_ids: 0
-      group_ids: 2
-      group_ids: 4
-    }
-    inner_subroutines {
-      name: "reduce-scatter_dim-1_mesh-1d"
-      subroutine_root_id: 21
-      execution_probability: 1
-      execution_count: 1
-      instructions {
-        name: "reduce-scatter_dim-1_mesh-1d_ccw_sendrecv_0"
-        opcode: "sendrecv"
-        instruction_id: 8
-        bytes_in: 16
-        bytes_out: 16
-        communication_groups {
-          group_ids: 0
-          group_ids: 0
-        }
-      }
-      instructions {
-        name: "reduce-scatter_dim-1_mesh-1d_ccw_reduction_0"
-        opcode: "call"
-        instruction_id: 9
-        operand_ids: 8
-        inner_subroutines {
-          name: "reduction_subroutine_ccw_phase_0"
-          subroutine_root_id: 12
-          execution_probability: 1
-          execution_count: 1
-          instructions {
-            name: "op1_ccw_phase_0"
-            opcode: "delay"
-            instruction_id: 10
-            bytes_out: 16
-          }
-          instructions {
-            name: "op2_ccw_phase_0"
-            opcode: "delay"
-            instruction_id: 11
-            bytes_out: 16
-          }
-          instructions {
-            name: "sum_ccw_phase_0"
-            opcode: "delay"
-            instruction_id: 12
-            ops: 32
-            operand_ids: 10
-            operand_ids: 11
-          }
-        }
-      }
-      instructions {
-        name: "reduce-scatter_dim-1_mesh-1d_cw_sendrecv_0"
-        opcode: "sendrecv"
-        instruction_id: 13
-        bytes_in: 16
-        bytes_out: 16
-        communication_groups {
-          group_ids: 4
-          group_ids: 4
-        }
-      }
-      instructions {
-        name: "reduce-scatter_dim-1_mesh-1d_cw_reduction_0"
-        opcode: "call"
-        instruction_id: 14
-        operand_ids: 13
-        inner_subroutines {
-          name: "reduction_subroutine_cw_phase_0"
-          subroutine_root_id: 17
-          execution_probability: 1
-          execution_count: 1
-          instructions {
-            name: "op1_cw_phase_0"
-            opcode: "delay"
-            instruction_id: 15
-            bytes_out: 16
-          }
-          instructions {
-            name: "op2_cw_phase_0"
-            opcode: "delay"
-            instruction_id: 16
-            bytes_out: 16
-          }
-          instructions {
-            name: "sum_cw_phase_0"
-            opcode: "delay"
-            instruction_id: 17
-            ops: 32
-            operand_ids: 15
-            operand_ids: 16
-          }
-        }
-      }
-      instructions {
-        name: "reduce-scatter_dim-1_mesh-1d_root_0"
-        opcode: "null"
-        instruction_id: 18
-        operand_ids: 14
-        operand_ids: 9
-      }
-      instructions {
-        name: "reduce-scatter_dim-1_mesh-1d_ccw_send_1"
-        opcode: "send"
-        instruction_id: 19
-        bytes_out: 16
-        communication_groups {
-          group_ids: 0
-        }
-        operand_ids: 18
-      }
-      instructions {
-        name: "reduce-scatter_dim-1_mesh-1d_cw_send_1"
-        opcode: "send"
-        instruction_id: 20
-        bytes_out: 16
-        communication_groups {
-          group_ids: 4
-        }
-        operand_ids: 18
-      }
-      instructions {
-        name: "reduce-scatter_dim-1_mesh-1d_root_1"
-        opcode: "null"
-        instruction_id: 21
-        operand_ids: 20
-        operand_ids: 19
-      }
-    }
-  }
-}
-      )proto";
-  google::protobuf::TextFormat::ParseFromString(reducescatter_str,
-                                                &reducescatter_proto);
+  paragraph::InstructionProto reducescatter_proto =
+      Mesh2dReduceScatter_inconsecutive_proc_test_proto();
   EXPECT_TRUE(google::protobuf::util::MessageDifferencer::Equals(
       reducescatter->ToProto().value(), reducescatter_proto));
 }
