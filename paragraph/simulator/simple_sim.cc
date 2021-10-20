@@ -26,9 +26,9 @@ namespace paragraph {
 
 shim::StatusOr<std::unique_ptr<SimpleSim>> SimpleSim::Create(
     std::unique_ptr<Graph> graph,
-    const PerformanceParameters& processor_parameters,
+    const PerformanceParameters& performance_parameters,
     std::unique_ptr<Logger> logger) {
-  auto simulator = absl::WrapUnique(new SimpleSim(processor_parameters));
+  auto simulator = absl::WrapUnique(new SimpleSim(performance_parameters));
   simulator->graph_ = std::move(graph);
   ASSIGN_OR_RETURN(simulator->scheduler_,
                    GraphScheduler::Create(simulator->graph_.get(),
@@ -36,12 +36,10 @@ shim::StatusOr<std::unique_ptr<SimpleSim>> SimpleSim::Create(
   return simulator;
 }
 
-absl::Status SimpleSim::StartSimulation(double start_time) {
+absl::Status SimpleSim::Simulate(double start_time) {
   processor_time_ = start_time;
-  for (auto& processor_id : graph_->GetCommunicationSet()) {
-    rx_link_time_[processor_id] = start_time;
-    tx_link_time_[processor_id] = start_time;
-  }
+  nic_tx_time_ = start_time;
+  nic_rx_time_ = start_time;
   RETURN_IF_ERROR(scheduler_->Initialize(start_time));
   RETURN_IF_ERROR(FetchAndExecute());
   return absl::OkStatus();
@@ -81,42 +79,34 @@ absl::Status SimpleSim::FetchAndExecute() {
       processor_time_ = current_time;
     } else if ((opcode == Opcode::kSendStart) ||
                (opcode == Opcode::kSendDone)) {
-      ASSIGN_OR_RETURN(int64_t dst, executing_instruction->PeerId());
-      RETURN_IF_FALSE(tx_link_time_.find(dst) != tx_link_time_.end(),
-                      absl::InternalError) << "PeerId " << dst
-          << " not found in simulator transmiting links map.";
       double current_time = std::max(
           scheduler_->GetFsm(executing_instruction).GetTimeReady(),
-          tx_link_time_.at(dst));
+          nic_tx_time_);
       scheduler_->InstructionStarted(executing_instruction, current_time);
       if (opcode == Opcode::kSendStart) {
         // We take into account network delay on tx_link between current
         // processor and its peer for SendStart instructions, while we model
         // SendDone as instant
         current_time += executing_instruction->GetBytesIn() /
-            processor_parameters_.network_bandwidth_;
+            performance_parameters_.network_bandwidth_;
       }
       scheduler_->InstructionFinished(executing_instruction, current_time);
-      tx_link_time_.at(dst) = current_time;
+      nic_tx_time_ = current_time;
     } else if ((opcode == Opcode::kRecvStart) ||
                (opcode == Opcode::kRecvDone)) {
-      ASSIGN_OR_RETURN(int64_t src, executing_instruction->PeerId());
-      RETURN_IF_FALSE(rx_link_time_.find(src) != rx_link_time_.end(),
-                      absl::InternalError) << "PeerId " << src
-          << " not found in simulator receiving links map.";
       double current_time = std::max(
           scheduler_->GetFsm(executing_instruction).GetTimeReady(),
-          rx_link_time_.at(src));
+          nic_rx_time_);
       scheduler_->InstructionStarted(executing_instruction, current_time);
       if (opcode == Opcode::kRecvDone) {
         // We take into account network delay on rx_link between current
-        // processor and its peer for RecvDone instructions, while we modes
-        // RecvStart as instant
+        // processor and its peer for RecvDone instructions. We model RecvStart
+        // as instant, as we believe that all memory is allocated a priori
         current_time += executing_instruction->GetBytesOut() /
-            processor_parameters_.network_bandwidth_;
+            performance_parameters_.network_bandwidth_;
       }
       scheduler_->InstructionFinished(executing_instruction, current_time);
-      rx_link_time_.at(src) = current_time;
+      nic_rx_time_ = current_time;
     } else if (OpcodeIsCollectiveCommunication(opcode) ||
                OpcodeIsIndividualCommunication(opcode) ||
                OpcodeIsProtocolLevelCommunication(opcode) ||
@@ -131,9 +121,11 @@ absl::Status SimpleSim::FetchAndExecute() {
   return absl::OkStatus();
 }
 
-SimpleSim::SimpleSim(const PerformanceParameters& processor_parameters)
+SimpleSim::SimpleSim(const PerformanceParameters& performance_parameters)
   : processor_time_(0),
-    processor_parameters_(processor_parameters) {}
+    nic_tx_time_(0),
+    nic_rx_time_(0),
+    performance_parameters_(performance_parameters) {}
 
 void SimpleSim::InstructionFetch() {
   // Fetches all available instructions from the scheduler
@@ -144,6 +136,14 @@ void SimpleSim::InstructionFetch() {
 
 double SimpleSim::GetProcessorTime() const {
   return processor_time_;
+}
+
+double SimpleSim::GetNicTxTime() const {
+  return nic_tx_time_;
+}
+
+double SimpleSim::GetNicRxTime() const {
+  return nic_rx_time_;
 }
 
 }  // namespace paragraph

@@ -80,7 +80,7 @@ int32_t main(int32_t argc, char** argv) {
             << " gbps" << std::endl;
   std::cout << "Starting simlator with simulation starting time 0.0s."
             << std::endl;
-  CHECK_OK(sim->StartSimulation(0.0));
+  CHECK_OK(sim->Simulate(0.0));
   std::cout << "Exiting simlator. Simulation is finished at simulation time "
             << sim->GetProcessorTime() << std::endl;
   return 0;

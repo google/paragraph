@@ -113,7 +113,7 @@ TEST(SimpleSim, WhileLoop) {
   auto perf = paragraph::SimpleSim::PerformanceParameters(1, 1, 1000);
   ASSERT_OK_AND_ASSIGN(auto sim, paragraph::SimpleSim::Create(
       std::move(translated_graphs.at(0)), perf, std::move(logger)));
-  EXPECT_OK(sim->StartSimulation(1));
+  EXPECT_OK(sim->Simulate(1));
 
   EXPECT_TRUE(std::filesystem::exists(log_filename("logger_test.csv")));
   std::ifstream testfile(log_filename("logger_test.csv"));
